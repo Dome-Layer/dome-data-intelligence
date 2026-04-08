@@ -41,6 +41,7 @@ export interface ColumnClassification {
   is_ordinal: boolean
   unit: string | null
   note: string | null
+  aggregation_hint?: 'sum' | 'last'  // "last" for snapshot metrics (balance, price, rate)
 }
 
 // Charts

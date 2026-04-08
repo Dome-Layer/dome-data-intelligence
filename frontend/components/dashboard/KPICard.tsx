@@ -9,6 +9,9 @@ export default function KPICard({ chart, rows, classifications }: ChartProps) {
   const col = chart.y_column ?? ''
   const unit = classifications.find((c) => c.column_name === col)?.unit ?? null
 
+  const classification = classifications.find((c) => c.column_name === col)
+  const isSnapshot = classification?.aggregation_hint === 'last'
+
   const values = rows
     .map((r) => Number(r[col]))
     .filter((n) => isFinite(n) && !isNaN(n))
@@ -22,6 +25,8 @@ export default function KPICard({ chart, rows, classifications }: ChartProps) {
   }
 
   const total = values.reduce((a, b) => a + b, 0)
+  const primaryValue = isSnapshot ? values[values.length - 1] : total
+  const primaryLabel = isSnapshot ? 'Latest' : 'Total'
   const mean = total / values.length
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -35,9 +40,9 @@ export default function KPICard({ chart, rows, classifications }: ChartProps) {
 
       <p className="mb-1 truncate text-xs text-dome-muted">{chart.title}</p>
       <p className="font-mono text-2xl font-bold text-dome-accent truncate">
-        {fmtValue(total, unit)}
+        {fmtValue(primaryValue, unit)}
       </p>
-      <p className="mt-0.5 text-xs text-dome-muted">Total</p>
+      <p className="mt-0.5 text-xs text-dome-muted">{primaryLabel}</p>
 
       <div className="mt-4 grid grid-cols-3 gap-1 border-t border-dome-border pt-3 text-center">
         {(

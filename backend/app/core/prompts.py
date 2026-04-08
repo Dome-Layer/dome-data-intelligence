@@ -8,7 +8,7 @@ Your task is to classify each column into exactly one of these types:
 - date: ISO date strings (YYYY-MM-DD, YYYY-MM, etc.) or parseable date formats. Must be actual calendar dates, not labels.
 - ordered_category: categorical values with a natural order that are NOT calendar dates. Examples: "Q1 2024", "Q2 2024"; "Jan 2024", "Feb 2024"; "Low", "Medium", "High"; "Stage 1", "Stage 2".
 - category: unordered categorical values (names, codes, labels, statuses, flags).
-- metric: numeric values intended for aggregation (sum, average, min, max). Includes integers and floats. May be negative.
+- metric: numeric values intended for aggregation. Includes integers and floats. May be negative.
 
 Rules:
 - A column with values like "Q1 2024", "Q2 2024", "Q3 2024", "Q4 2024" is ordered_category, NOT date.
@@ -18,15 +18,20 @@ Rules:
 - For metric columns, set can_be_negative: true if min < 0 or the column name implies it (Variance, Net, Exposure, etc.).
 - For category columns with a natural rank order, set is_ordinal: true.
 - Add a note only when the classification requires explanation (e.g. "quarterly labels, not ISO dates").
+- For metric columns, set aggregation_hint to "last" if the column represents a point-in-time snapshot
+  (e.g. Balance, Closing Balance, Price, Rate, NAV, Stock Level, Headcount, Inventory, Outstanding, Portfolio Value).
+  Set aggregation_hint to "sum" for flow metrics that accumulate over time
+  (e.g. Revenue, Sales, Cost, Expenses, Volume, Quantity Sold, Transactions).
 
 Respond ONLY with a JSON array. No preamble, no markdown fences, no explanation.
 
 Example output:
 [
-  {"column_name": "Date", "classified_type": "date", "unique_count": 28, "can_be_negative": false, "is_ordinal": false, "unit": null, "note": null},
-  {"column_name": "Commodity", "classified_type": "category", "unique_count": 7, "can_be_negative": false, "is_ordinal": false, "unit": null, "note": null},
-  {"column_name": "Net_Exposure_USD", "classified_type": "metric", "unique_count": 28, "can_be_negative": true, "is_ordinal": false, "unit": "USD", "note": null},
-  {"column_name": "Risk_Flag", "classified_type": "category", "unique_count": 3, "can_be_negative": false, "is_ordinal": true, "unit": null, "note": "OK < MONITOR < REVIEW"}
+  {"column_name": "Date", "classified_type": "date", "unique_count": 28, "can_be_negative": false, "is_ordinal": false, "unit": null, "note": null, "aggregation_hint": "sum"},
+  {"column_name": "Commodity", "classified_type": "category", "unique_count": 7, "can_be_negative": false, "is_ordinal": false, "unit": null, "note": null, "aggregation_hint": "sum"},
+  {"column_name": "Closing_Balance_EUR", "classified_type": "metric", "unique_count": 28, "can_be_negative": false, "is_ordinal": false, "unit": "EUR", "note": null, "aggregation_hint": "last"},
+  {"column_name": "Net_Exposure_USD", "classified_type": "metric", "unique_count": 28, "can_be_negative": true, "is_ordinal": false, "unit": "USD", "note": null, "aggregation_hint": "sum"},
+  {"column_name": "Risk_Flag", "classified_type": "category", "unique_count": 3, "can_be_negative": false, "is_ordinal": true, "unit": null, "note": "OK < MONITOR < REVIEW", "aggregation_hint": "sum"}
 ]\
 """
 

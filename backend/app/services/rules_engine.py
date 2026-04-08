@@ -49,11 +49,13 @@ def fire_rules(classifications: list[ColumnClassification]) -> list[ChartConfig]
     # R-03: metric → KPI cards (max 6)
     for metric_col in metric_cols[:6]:
         unit_suffix = f" ({metric_col.unit})" if metric_col.unit else ""
+        is_snapshot = getattr(metric_col, "aggregation_hint", "sum") == "last"
+        kpi_label = "Latest" if is_snapshot else "Total"
         charts.append(ChartConfig(
             chart_id=next_id(),
             rule_id="R-03",
             chart_type=ChartType.kpi,
-            title=f"Total {metric_col.column_name}{unit_suffix}",
+            title=f"{kpi_label} {metric_col.column_name}{unit_suffix}",
             x_column=None,
             y_column=metric_col.column_name,
             color_column=None,
