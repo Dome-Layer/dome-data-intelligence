@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   title: 'Dome Data Intelligence',
   description:
     'Upload any spreadsheet. Get a governed analytics dashboard in seconds.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 export default function RootLayout({
