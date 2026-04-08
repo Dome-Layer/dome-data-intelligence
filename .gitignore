@@ -31,8 +31,9 @@ yarn-error.log*
 # Session logs (internal working files)
 SESSION_LOG.md
 
-# Sample data files
+# Sample data files (excluded except bundled demo datasets)
 *.csv
+!frontend/public/demo/*.csv
 
 # Misc
 *.log

@@ -1,0 +1,136 @@
+Month,Supplier,Category,PO_Value_EUR,Invoice_Value_EUR,Discrepancy_EUR,Discrepancy_Pct,Approval_Status
+Jan 2024,Insight Direct,Software Licensing,46897,46897,0,0.0,Approved
+Jan 2024,Equinix,Facilities & Infra,69327,69327,0,0.0,Approved
+Jan 2024,Ricoh,Office & Peripherals,127664,125084,-2580,-2.02,Pending
+Jan 2024,CDW,IT Hardware,235614,235614,0,0.0,Approved
+Jan 2024,DXC Technology,Managed Services,224821,243733,18912,8.41,Flagged
+Jan 2024,Softcat,Software Licensing,211593,244007,32414,15.32,Flagged
+Jan 2024,Kyndryl,Managed Services,107338,107338,0,0.0,Approved
+Jan 2024,Iron Mountain,Facilities & Infra,252729,252729,0,0.0,Approved
+Jan 2024,Crayon,Software Licensing,275021,282506,7485,2.72,Pending
+Jan 2024,Accenture,Professional Services,104722,106905,2183,2.08,Approved
+Jan 2024,SHI International,IT Hardware,160533,161877,1344,0.84,Approved
+Feb 2024,Softcat,Software Licensing,250324,245630,-4694,-1.88,Pending
+Feb 2024,CDW,IT Hardware,200014,200014,0,0.0,Approved
+Feb 2024,Capgemini,Professional Services,127342,125229,-2113,-1.66,Approved
+Feb 2024,Crayon,Software Licensing,262038,262038,0,0.0,Approved
+Feb 2024,Insight Direct,Software Licensing,49988,51285,1297,2.59,Approved
+Feb 2024,Kyndryl,Managed Services,122816,143106,20290,16.52,Flagged
+Feb 2024,Deloitte,Professional Services,66420,59863,-6557,-9.87,Pending
+Feb 2024,Equinix,Facilities & Infra,205687,205687,0,0.0,Approved
+Feb 2024,DXC Technology,Managed Services,177420,180929,3509,1.98,Approved
+Feb 2024,Ricoh,Office & Peripherals,164730,164730,0,0.0,Approved
+Feb 2024,Xerox,Office & Peripherals,63690,62487,-1203,-1.89,Approved
+Mar 2024,Equinix,Facilities & Infra,44566,44566,0,0.0,Approved
+Mar 2024,Iron Mountain,Facilities & Infra,84077,84660,583,0.69,Approved
+Mar 2024,Capgemini,Professional Services,240237,240237,0,0.0,Approved
+Mar 2024,DXC Technology,Managed Services,97675,97675,0,0.0,Approved
+Mar 2024,Computacenter,IT Hardware,162016,162016,0,0.0,Approved
+Mar 2024,Deloitte,Professional Services,232924,232924,0,0.0,Approved
+Mar 2024,Crayon,Software Licensing,67537,66564,-973,-1.44,Approved
+Mar 2024,SHI International,IT Hardware,81228,83358,2130,2.62,Approved
+Mar 2024,Insight Direct,Software Licensing,75186,76675,1489,1.98,Approved
+Mar 2024,Xerox,Office & Peripherals,106020,106020,0,0.0,Approved
+Mar 2024,Ricoh,Office & Peripherals,118566,118566,0,0.0,Approved
+Mar 2024,CDW,IT Hardware,215183,216281,1098,0.51,Approved
+Apr 2024,Capgemini,Professional Services,232699,232699,0,0.0,Approved
+Apr 2024,Accenture,Professional Services,93299,93299,0,0.0,Approved
+Apr 2024,Crayon,Software Licensing,20944,20944,0,0.0,Approved
+Apr 2024,Computacenter,IT Hardware,108755,108755,0,0.0,Approved
+Apr 2024,Insight Direct,Software Licensing,246887,260630,13743,5.57,Pending
+Apr 2024,Xerox,Office & Peripherals,271316,271316,0,0.0,Approved
+Apr 2024,Ricoh,Office & Peripherals,56659,48378,-8281,-14.62,Pending
+Apr 2024,CDW,IT Hardware,256510,258368,1858,0.72,Approved
+Apr 2024,SHI International,IT Hardware,82770,82259,-511,-0.62,Approved
+Apr 2024,Kyndryl,Managed Services,262673,262673,0,0.0,Approved
+Apr 2024,DXC Technology,Managed Services,258679,258679,0,0.0,Approved
+Apr 2024,Deloitte,Professional Services,165638,161333,-4305,-2.6,Approved
+May 2024,Capgemini,Professional Services,81886,81886,0,0.0,Approved
+May 2024,DXC Technology,Managed Services,261699,261699,0,0.0,Approved
+May 2024,Ricoh,Office & Peripherals,16176,16176,0,0.0,Approved
+May 2024,Crayon,Software Licensing,84703,84703,0,0.0,Approved
+May 2024,Xerox,Office & Peripherals,101417,102331,914,0.9,Pending
+May 2024,Accenture,Professional Services,22931,22931,0,0.0,Approved
+May 2024,Insight Direct,Software Licensing,120743,120743,0,0.0,Approved
+May 2024,CDW,IT Hardware,116545,116545,0,0.0,Approved
+May 2024,Equinix,Facilities & Infra,52065,52065,0,0.0,Approved
+May 2024,Deloitte,Professional Services,153058,153058,0,0.0,Approved
+Jun 2024,Crayon,Software Licensing,166959,185360,18401,11.02,Flagged
+Jun 2024,Softcat,Software Licensing,203379,202214,-1165,-0.57,Approved
+Jun 2024,Ricoh,Office & Peripherals,146211,146211,0,0.0,Approved
+Jun 2024,Xerox,Office & Peripherals,13476,13476,0,0.0,Approved
+Jun 2024,Accenture,Professional Services,33619,29442,-4177,-12.42,Approved
+Jun 2024,CDW,IT Hardware,211753,208426,-3327,-1.57,Pending
+Jun 2024,Deloitte,Professional Services,194548,194548,0,0.0,Approved
+Jun 2024,Equinix,Facilities & Infra,178008,182155,4147,2.33,Pending
+Jun 2024,Iron Mountain,Facilities & Infra,80986,80986,0,0.0,Approved
+Jun 2024,SHI International,IT Hardware,174956,174956,0,0.0,Approved
+Jun 2024,DXC Technology,Managed Services,154136,154136,0,0.0,Approved
+Jul 2024,Xerox,Office & Peripherals,110888,110888,0,0.0,Approved
+Jul 2024,DXC Technology,Managed Services,137097,137097,0,0.0,Approved
+Jul 2024,Crayon,Software Licensing,47729,47729,0,0.0,Approved
+Jul 2024,Equinix,Facilities & Infra,72729,72729,0,0.0,Approved
+Jul 2024,Softcat,Software Licensing,36887,36587,-300,-0.81,Approved
+Jul 2024,Iron Mountain,Facilities & Infra,27131,26582,-549,-2.02,Pending
+Jul 2024,Computacenter,IT Hardware,246858,246858,0,0.0,Approved
+Jul 2024,Accenture,Professional Services,230345,230345,0,0.0,Approved
+Jul 2024,SHI International,IT Hardware,165269,165269,0,0.0,Approved
+Jul 2024,Insight Direct,Software Licensing,262046,262046,0,0.0,Approved
+Jul 2024,Capgemini,Professional Services,267243,267243,0,0.0,Approved
+Jul 2024,Ricoh,Office & Peripherals,192180,218869,26689,13.89,Flagged
+Aug 2024,SHI International,IT Hardware,79113,79113,0,0.0,Approved
+Aug 2024,DXC Technology,Managed Services,154678,130051,-24627,-15.92,Flagged
+Aug 2024,Deloitte,Professional Services,127629,126955,-674,-0.53,Approved
+Aug 2024,Accenture,Professional Services,187828,164895,-22933,-12.21,Flagged
+Aug 2024,Insight Direct,Software Licensing,95989,89193,-6796,-7.08,Pending
+Aug 2024,Computacenter,IT Hardware,26892,26892,0,0.0,Approved
+Aug 2024,Ricoh,Office & Peripherals,276066,276066,0,0.0,Approved
+Aug 2024,Kyndryl,Managed Services,218311,218311,0,0.0,Approved
+Aug 2024,Softcat,Software Licensing,33624,33624,0,0.0,Approved
+Aug 2024,Capgemini,Professional Services,149555,149555,0,0.0,Approved
+Aug 2024,Equinix,Facilities & Infra,105445,105445,0,0.0,Approved
+Aug 2024,Iron Mountain,Facilities & Infra,231827,226322,-5505,-2.37,Flagged
+Aug 2024,Crayon,Software Licensing,93700,93700,0,0.0,Approved
+Sep 2024,Insight Direct,Software Licensing,37987,37644,-343,-0.9,Pending
+Sep 2024,DXC Technology,Managed Services,80178,81019,841,1.05,Approved
+Sep 2024,Iron Mountain,Facilities & Infra,144134,145020,886,0.61,Approved
+Sep 2024,Kyndryl,Managed Services,140000,140000,0,0.0,Approved
+Sep 2024,Capgemini,Professional Services,237433,237433,0,0.0,Approved
+Sep 2024,Accenture,Professional Services,202949,202949,0,0.0,Approved
+Sep 2024,Xerox,Office & Peripherals,198623,203865,5242,2.64,Flagged
+Sep 2024,Equinix,Facilities & Infra,16103,13820,-2283,-14.18,Approved
+Sep 2024,Crayon,Software Licensing,52476,55231,2755,5.25,Approved
+Sep 2024,Ricoh,Office & Peripherals,105526,105526,0,0.0,Approved
+Sep 2024,SHI International,IT Hardware,51654,51654,0,0.0,Approved
+Oct 2024,Equinix,Facilities & Infra,231071,227741,-3330,-1.44,Approved
+Oct 2024,Accenture,Professional Services,117532,105541,-11991,-10.2,Pending
+Oct 2024,Computacenter,IT Hardware,119456,117084,-2372,-1.99,Pending
+Oct 2024,Iron Mountain,Facilities & Infra,130043,130043,0,0.0,Approved
+Oct 2024,Ricoh,Office & Peripherals,213087,208060,-5027,-2.36,Pending
+Oct 2024,SHI International,IT Hardware,19205,20277,1072,5.58,Pending
+Oct 2024,Deloitte,Professional Services,23423,23423,0,0.0,Approved
+Oct 2024,Xerox,Office & Peripherals,210360,210360,0,0.0,Approved
+Oct 2024,Insight Direct,Software Licensing,239366,239366,0,0.0,Approved
+Oct 2024,Kyndryl,Managed Services,218652,218652,0,0.0,Approved
+Nov 2024,Accenture,Professional Services,206048,202947,-3101,-1.5,Pending
+Nov 2024,Computacenter,IT Hardware,133495,133495,0,0.0,Approved
+Nov 2024,Xerox,Office & Peripherals,143216,142209,-1007,-0.7,Approved
+Nov 2024,DXC Technology,Managed Services,225766,223285,-2481,-1.1,Approved
+Nov 2024,Softcat,Software Licensing,200087,202106,2019,1.01,Approved
+Nov 2024,Equinix,Facilities & Infra,234156,234156,0,0.0,Approved
+Nov 2024,Kyndryl,Managed Services,207890,207890,0,0.0,Approved
+Nov 2024,Iron Mountain,Facilities & Infra,270263,270263,0,0.0,Approved
+Nov 2024,Ricoh,Office & Peripherals,224708,223488,-1220,-0.54,Approved
+Nov 2024,Capgemini,Professional Services,198349,225443,27094,13.66,Flagged
+Nov 2024,Crayon,Software Licensing,12522,12438,-84,-0.67,Approved
+Nov 2024,Deloitte,Professional Services,171503,171503,0,0.0,Approved
+Nov 2024,CDW,IT Hardware,198857,198857,0,0.0,Approved
+Dec 2024,Kyndryl,Managed Services,180531,178837,-1694,-0.94,Pending
+Dec 2024,Computacenter,IT Hardware,167287,143650,-23637,-14.13,Flagged
+Dec 2024,Accenture,Professional Services,147031,147031,0,0.0,Approved
+Dec 2024,Iron Mountain,Facilities & Infra,229705,229705,0,0.0,Approved
+Dec 2024,Softcat,Software Licensing,122867,121372,-1495,-1.22,Approved
+Dec 2024,Deloitte,Professional Services,130571,130571,0,0.0,Approved
+Dec 2024,Crayon,Software Licensing,191829,194055,2226,1.16,Pending
+Dec 2024,CDW,IT Hardware,162106,157602,-4504,-2.78,Approved
+Dec 2024,Equinix,Facilities & Infra,258707,258707,0,0.0,Approved
