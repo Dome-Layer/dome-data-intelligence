@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     supabase_url: Optional[str] = None
     supabase_service_key: Optional[str] = None
 
+    # Security
+    # Shared secret required in X-API-Key header for all non-health endpoints.
+    # Leave empty to disable auth (development only).
+    api_key: Optional[str] = None
+    # HMAC secret used to sign/verify session IDs.
+    # MUST be set to a random 32+ char string in production.
+    session_signing_secret: str = "change-me-in-production-use-32-random-chars"
+
     # App
     allowed_origins: str = "http://localhost:3000"
     environment: str = "development"

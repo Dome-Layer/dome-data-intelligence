@@ -58,31 +58,27 @@ export default function UploadPage() {
         })
 
         // Step 3: persist to sessionStorage and navigate
+        // Sessions expire after 30 minutes to limit how long sensitive data lingers.
         setState({ status: 'running', step: 'done', filename })
+        const sessionPayload = {
+          dashboard: dashboardRes,
+          filename,
+          rows,
+          columnSummary: uploadRes.column_summary,
+          loadedSheets,
+          skippedSheets,
+          expiresAt: Date.now() + 30 * 60 * 1000,
+        }
         try {
           sessionStorage.setItem(
             `dome_session_${uploadRes.session_id}`,
-            JSON.stringify({
-              dashboard: dashboardRes,
-              filename,
-              rows,
-              columnSummary: uploadRes.column_summary,
-              loadedSheets,
-              skippedSheets,
-            }),
+            JSON.stringify(sessionPayload),
           )
         } catch {
           // sessionStorage full — store without rows (DataTable falls back gracefully)
           sessionStorage.setItem(
             `dome_session_${uploadRes.session_id}`,
-            JSON.stringify({
-              dashboard: dashboardRes,
-              filename,
-              rows: [],
-              columnSummary: uploadRes.column_summary,
-              loadedSheets,
-              skippedSheets,
-            }),
+            JSON.stringify({ ...sessionPayload, rows: [] }),
           )
         }
 

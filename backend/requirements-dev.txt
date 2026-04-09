@@ -1,0 +1,4 @@
+# Development and test dependencies — do NOT install in production images
+-r requirements.txt
+pytest~=8.2.0
+pytest-asyncio~=0.23.0

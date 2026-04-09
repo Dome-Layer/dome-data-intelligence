@@ -106,8 +106,15 @@ export default function DashboardPage() {
   useEffect(() => {
     const raw = sessionStorage.getItem(`dome_session_${sessionId}`)
     if (!raw) { setNotFound(true); return }
-    try { setData(JSON.parse(raw) as SessionData) }
-    catch { setNotFound(true) }
+    try {
+      const parsed = JSON.parse(raw) as SessionData & { expiresAt?: number }
+      if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+        sessionStorage.removeItem(`dome_session_${sessionId}`)
+        setNotFound(true)
+        return
+      }
+      setData(parsed)
+    } catch { setNotFound(true) }
   }, [sessionId])
 
   if (notFound) {

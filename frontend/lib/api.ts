@@ -10,6 +10,12 @@ import type {
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '') ?? 'http://localhost:8000'
 
+// Shared API key sent in X-API-Key header.
+// The backend ignores this header when API_KEY is not configured (dev mode).
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? ''
+
+const REQUEST_TIMEOUT_MS = 30_000
+
 export class APIError extends Error {
   constructor(
     public readonly status: number,
@@ -21,24 +27,40 @@ export class APIError extends Error {
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}/api/v1${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
-  if (!res.ok) {
-    let detail = res.statusText
-    try {
-      const json = await res.json()
-      detail = json.detail ?? detail
-    } catch {
-      // ignore parse errors — use statusText
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (API_KEY) headers['X-API-Key'] = API_KEY
+
+    const res = await fetch(`${API_BASE}/api/v1${path}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      let detail = res.statusText
+      try {
+        const json = await res.json()
+        detail = json.detail ?? detail
+      } catch {
+        // ignore parse errors — use statusText
+      }
+      throw new APIError(res.status, detail)
     }
-    throw new APIError(res.status, detail)
-  }
 
-  return res.json() as Promise<T>
+    return res.json() as Promise<T>
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new APIError(408, 'Request timed out — please try again')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 export async function uploadSummary(body: UploadRequest): Promise<UploadResponse> {
