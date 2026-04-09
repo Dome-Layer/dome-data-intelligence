@@ -33,13 +33,14 @@ async def upload_summary(request: Request, body: UploadRequest) -> UploadRespons
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
 
-    session_id = sign_session_id(str(uuid.uuid4()))
+    session_uuid = str(uuid.uuid4())
+    session_id = sign_session_id(session_uuid)
 
     db = get_supabase_client()
     if db:
         try:
             db.table("sessions").insert({
-                "session_id": session_id,
+                "session_id": session_uuid,  # store raw UUID; signed token is for the client only
                 "filename": body.filename,
                 "row_count": body.row_count,
                 "column_summary": [c.model_dump() for c in columns],
@@ -49,7 +50,7 @@ async def upload_summary(request: Request, body: UploadRequest) -> UploadRespons
 
     logger.info(
         "upload_received",
-        session_id=session_id,
+        session_id=session_uuid,
         filename=body.filename,
         row_count=body.row_count,
         column_count=len(columns),
