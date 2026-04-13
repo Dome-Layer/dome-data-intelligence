@@ -70,7 +70,7 @@ class ColumnClassification(BaseModel):
     is_ordinal: bool
     unit: Optional[str] = None
     note: Optional[str] = None
-    aggregation_hint: str = "sum"  # "sum" for flow metrics, "last" for snapshot metrics
+    aggregation_hint: Optional[str] = "sum"  # "sum" for flow metrics, "last" for snapshot metrics
 
 
 # --- Charts ---
