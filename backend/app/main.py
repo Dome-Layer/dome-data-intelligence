@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging
-from app.api import upload, dashboard, qa
+from app.api import upload, dashboard, qa, dashboards, auth as auth_router
 
 settings = get_settings()
 configure_logging(settings.environment)
@@ -71,13 +71,15 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-API-Key", "Authorization"],
 )
 
 app.include_router(upload.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(qa.router, prefix="/api/v1")
+app.include_router(dashboards.router, prefix="/api/v1")
+app.include_router(auth_router.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

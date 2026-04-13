@@ -6,6 +6,7 @@ import type {
   QARequest,
   QAResponse,
 } from '@/lib/types'
+import { authHeaders } from '@/lib/auth'
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, '') ?? 'http://localhost:8000'
@@ -26,17 +27,14 @@ export class APIError extends Error {
   }
 }
 
-// Forward the dome_auth_token SSO cookie as a Bearer token so the backend
-// can optionally link sessions to the authenticated DOME Platform user.
-// Returns an empty object when no SSO session is active (anonymous usage).
-function getAuthHeaders(): Record<string, string> {
-  if (typeof document === 'undefined') return {}
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('dome_auth_token='))
-  if (!match) return {}
-  const token = match.split('=').slice(1).join('=')
-  return token ? { Authorization: `Bearer ${token}` } : {}
+function buildHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...authHeaders(),
+    ...extra,
+  }
+  if (API_KEY) headers['X-API-Key'] = API_KEY
+  return headers
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -44,15 +42,9 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
   try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    }
-    if (API_KEY) headers['X-API-Key'] = API_KEY
-
     const res = await fetch(`${API_BASE}/api/v1${path}`, {
       method: 'POST',
-      headers,
+      headers: buildHeaders(),
       body: JSON.stringify(body),
       signal: controller.signal,
     })
@@ -79,6 +71,28 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   }
 }
 
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}/api/v1${path}`, {
+    method,
+    headers: buildHeaders(),
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
+
+  if (!res.ok) {
+    let detail = res.statusText
+    try {
+      const json = await res.json()
+      detail = json.detail ?? detail
+    } catch {}
+    throw new APIError(res.status, detail)
+  }
+
+  if (res.status === 204) return undefined as T
+  return res.json() as Promise<T>
+}
+
+// ─── Existing endpoints ───────────────────────────────────────────
+
 export async function uploadSummary(body: UploadRequest): Promise<UploadResponse> {
   return post<UploadResponse>('/upload', body)
 }
@@ -91,4 +105,41 @@ export async function generateDashboard(
 
 export async function askQuestion(body: QARequest): Promise<QAResponse> {
   return post<QAResponse>('/qa', body)
+}
+
+// ─── Auth endpoints ───────────────────────────────────────────────
+
+export async function requestMagicLink(payload: { email: string }): Promise<void> {
+  await request<void>('POST', '/auth/magic-link', payload)
+}
+
+export async function deleteSession(): Promise<void> {
+  await request<void>('DELETE', '/auth/session')
+}
+
+// ─── Saved dashboards ─────────────────────────────────────────────
+
+export interface SavedDashboard {
+  id: string
+  session_id: string
+  filename: string
+  column_count: number
+  chart_count: number
+  label: string | null
+  saved_at: string
+}
+
+export async function listSavedDashboards(): Promise<{ dashboards: SavedDashboard[] }> {
+  return request('GET', '/dashboards')
+}
+
+export async function saveDashboard(
+  sessionId: string,
+  payload: { filename: string; column_count: number; chart_count: number; label?: string },
+): Promise<{ saved: boolean; saved_at: string }> {
+  return request('POST', `/dashboards/${sessionId}/save`, payload)
+}
+
+export async function deleteSavedDashboard(id: string): Promise<void> {
+  await request<void>('DELETE', `/dashboards/${id}`)
 }
