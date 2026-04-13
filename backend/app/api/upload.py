@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
@@ -16,10 +17,35 @@ logger = get_logger("api.upload")
 limiter = Limiter(key_func=get_remote_address)
 
 
+async def get_optional_user_id(request: Request) -> Optional[str]:
+    """Extract user_id from the SSO Bearer token if present.
+
+    Used to link anonymous Data Intelligence sessions to an authenticated
+    DOME Platform user when the dome_auth_token SSO cookie is forwarded by
+    the frontend. Falls back to None (anonymous session) if no valid token.
+    """
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    token = auth.removeprefix("Bearer ").strip()
+    db = get_supabase_client()
+    if db is None:
+        return None
+    try:
+        resp = db.auth.get_user(token)
+        return str(resp.user.id) if resp and resp.user else None
+    except Exception:
+        return None
+
+
 @router.post("/upload", response_model=UploadResponse, status_code=201,
              dependencies=[Depends(require_api_key)])
 @limiter.limit("30/minute")
-async def upload_summary(request: Request, body: UploadRequest) -> UploadResponse:
+async def upload_summary(
+    request: Request,
+    body: UploadRequest,
+    user_id: Optional[str] = Depends(get_optional_user_id),
+) -> UploadResponse:
     settings = get_settings()
 
     if body.row_count > settings.max_row_count:
@@ -39,12 +65,15 @@ async def upload_summary(request: Request, body: UploadRequest) -> UploadRespons
     db = get_supabase_client()
     if db:
         try:
-            db.table("sessions").insert({
+            row: dict = {
                 "session_id": session_uuid,  # store raw UUID; signed token is for the client only
                 "filename": body.filename,
                 "row_count": body.row_count,
                 "column_summary": [c.model_dump() for c in columns],
-            }).execute()
+            }
+            if user_id:
+                row["user_id"] = user_id
+            db.table("sessions").insert(row).execute()
         except Exception as exc:
             logger.warning("supabase_insert_failed", error=str(exc))
 
@@ -55,6 +84,7 @@ async def upload_summary(request: Request, body: UploadRequest) -> UploadRespons
         row_count=body.row_count,
         column_count=len(columns),
         warnings=len(warnings),
+        authenticated=user_id is not None,
     )
 
     return UploadResponse(

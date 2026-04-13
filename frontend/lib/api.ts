@@ -26,12 +26,28 @@ export class APIError extends Error {
   }
 }
 
+// Forward the dome_auth_token SSO cookie as a Bearer token so the backend
+// can optionally link sessions to the authenticated DOME Platform user.
+// Returns an empty object when no SSO session is active (anonymous usage).
+function getAuthHeaders(): Record<string, string> {
+  if (typeof document === 'undefined') return {}
+  const match = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('dome_auth_token='))
+  if (!match) return {}
+  const token = match.split('=').slice(1).join('=')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 async function post<T>(path: string, body: unknown): Promise<T> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    }
     if (API_KEY) headers['X-API-Key'] = API_KEY
 
     const res = await fetch(`${API_BASE}/api/v1${path}`, {
