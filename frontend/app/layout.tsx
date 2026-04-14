@@ -31,11 +31,14 @@ export const metadata: Metadata = {
   },
 }
 
-// Runs before first paint — prevents theme flash
+// Runs before first paint — prevents theme flash. Reads cookie first (shared
+// across all *.domelayer.com subdomains), then falls back to localStorage.
 const themeScript = `
 (function() {
   try {
-    var saved = localStorage.getItem('dome-theme');
+    var cookie = document.cookie.split('; ').find(function(r){ return r.startsWith('dome-theme='); });
+    var cookieVal = cookie ? cookie.split('=')[1] : null;
+    var saved = (cookieVal === 'dark' || cookieVal === 'light') ? cookieVal : localStorage.getItem('dome-theme');
     var theme = (saved === 'dark' || saved === 'light')
       ? saved
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');

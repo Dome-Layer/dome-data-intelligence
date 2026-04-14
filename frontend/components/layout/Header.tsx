@@ -26,6 +26,7 @@ export function Header() {
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--text-body-sm)",
                 fontWeight: 500,
+                lineHeight: "1.25rem",
                 color: "var(--color-text-secondary)",
                 textDecoration: "none",
                 transition: "color 150ms ease",
