@@ -186,7 +186,7 @@ export default function DashboardPage() {
     />
 
     <main className="min-h-screen px-6 md:px-8 py-10 pb-20 lg:pb-10 lg:pr-[396px]">
-      <div className="mx-auto max-w-[1152px] space-y-6">
+      <div className="max-w-[1152px] space-y-6">
 
         {/* Top bar */}
         <div className="flex items-center justify-between gap-4">
