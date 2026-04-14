@@ -9,6 +9,9 @@ import DashboardGrid from '@/components/dashboard/DashboardGrid'
 import DataTable from '@/components/dashboard/DataTable'
 import QAPanel from '@/components/qa/QAPanel'
 import { computeDataContext } from '@/lib/dataContext'
+import { useAuth } from '@/context/AuthContext'
+import { saveDashboard } from '@/lib/api'
+import { AuthModal } from '@/components/auth/AuthModal'
 
 interface SessionData {
   dashboard: DashboardResponse
@@ -77,14 +80,19 @@ function ClassificationsTable({ cols }: { cols: ColumnClassification[] }) {
   )
 }
 
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+
 export default function DashboardPage() {
   const params = useParams()
   const router = useRouter()
   const sessionId = params.sessionId as string
+  const { isAuthenticated } = useAuth()
 
   const [data, setData] = useState<SessionData | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [showClassifications, setShowClassifications] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [authOpen, setAuthOpen] = useState(false)
 
   // Column highlight bridge
   const [activeChartId, setActiveChartId] = useState<string | null>(null)
@@ -146,8 +154,29 @@ export default function DashboardPage() {
   const { classifications, charts, governance } = dashboard
   const dataContext = computeDataContext(rows, classifications)
 
+  async function handleSave() {
+    if (!isAuthenticated) {
+      setAuthOpen(true)
+      return
+    }
+    setSaveStatus('saving')
+    try {
+      await saveDashboard(sessionId, {
+        filename,
+        column_count: classifications.length,
+        chart_count: charts.length,
+      })
+      setSaveStatus('saved')
+    } catch {
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    }
+  }
+
   return (
     <>
+    {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+
     {/* QAPanel is position:fixed — renders outside the scroll flow */}
     <QAPanel
       sessionId={sessionId}
@@ -172,12 +201,26 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => router.push('/')}
-            className="rounded-lg border border-dome-border px-3 py-1.5 text-xs text-dome-muted hover:border-dome-border-accent hover:text-dome-text"
-          >
-            New file
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSave}
+              disabled={saveStatus === 'saving' || saveStatus === 'saved'}
+              className="rounded-lg border px-3 py-1.5 text-xs transition-colors disabled:cursor-default"
+              style={{
+                borderColor: saveStatus === 'saved' ? 'var(--color-success-border, #22c55e)' : 'var(--color-border-accent)',
+                color: saveStatus === 'saved' ? 'var(--color-success, #22c55e)' : 'var(--color-accent)',
+                opacity: saveStatus === 'saving' ? 0.6 : 1,
+              }}
+            >
+              {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : saveStatus === 'error' ? 'Error — retry' : 'Save'}
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="rounded-lg border border-dome-border px-3 py-1.5 text-xs text-dome-muted hover:border-dome-border-accent hover:text-dome-text"
+            >
+              New file
+            </button>
+          </div>
         </div>
 
         {/* Sheet info banner */}
