@@ -185,8 +185,9 @@ export default function DashboardPage() {
       dataContext={dataContext}
     />
 
-    <main className="min-h-screen px-6 md:px-8 py-10 pb-20 lg:pb-10 lg:pr-[396px]">
-      <div className="max-w-[1152px] space-y-6">
+    <main className="min-h-screen py-10 pb-20 lg:pb-10">
+      <div className="lg:grid lg:grid-cols-[1fr_396px]">
+      <div className="px-6 md:px-8 space-y-6 min-w-0">
 
         {/* Top bar */}
         <div className="flex items-center justify-between gap-4">
@@ -291,6 +292,9 @@ export default function DashboardPage() {
         />
 
 
+      </div>
+      {/* Spacer column — QAPanel (position:fixed) overlays this */}
+      <div className="hidden lg:block" aria-hidden="true" />
       </div>
     </main>
     </>
