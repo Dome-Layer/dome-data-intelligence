@@ -18,7 +18,7 @@ async def request_magic_link(body: MagicLinkRequest):
     if db is None:
         raise HTTPException(status_code=503, detail="Auth not configured")
     try:
-        db.auth.admin.generate_link({"type": "magiclink", "email": body.email})
+        db.auth.sign_in_with_otp({"email": body.email})
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Failed to send magic link") from exc
 
