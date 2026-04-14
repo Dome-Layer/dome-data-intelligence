@@ -72,6 +72,7 @@ async def generate_dashboard(request: Request, body: DashboardRequest) -> Dashbo
             db.table("sessions").update({
                 "classifications": [c.model_dump() for c in classifications],
                 "charts": [c.model_dump() for c in charts],
+                "governance": governance.model_dump(mode="json"),
             }).eq("session_id", session_uuid).execute()
         except Exception as exc:
             logger.warning("supabase_update_failed", error=str(exc))

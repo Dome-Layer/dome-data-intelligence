@@ -13,21 +13,25 @@ import { deleteSession } from "@/lib/api";
 
 interface AuthState {
   isAuthenticated: boolean;
+  isAuthLoading: boolean;
   signIn: (token: string, expiresAt?: string) => void;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState>({
   isAuthenticated: false,
+  isAuthLoading: true,
   signIn: () => {},
   signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
     setIsAuthenticated(!!getToken());
+    setIsAuthLoading(false);
   }, []);
 
   const signIn = useCallback((newToken: string, expiresAt?: string) => {
@@ -46,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>
+    <AuthContext.Provider value={{ isAuthenticated, isAuthLoading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

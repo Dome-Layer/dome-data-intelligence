@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
+from app.core.auth import verify_session_id
 from app.core.db import get_supabase_client
 
 router = APIRouter()
@@ -88,6 +89,47 @@ async def list_dashboards(req: Request):
         return {"dashboards": result.data}
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Failed to list dashboards") from exc
+
+
+@router.get("/dashboards/{session_id}/restore")
+async def restore_dashboard(session_id: str, req: Request):
+    """Return stored session data so the frontend can reconstruct a saved dashboard
+    without relying on sessionStorage. The user must own the saved dashboard."""
+    user_id = _require_user(req)
+    db = _require_db()
+
+    # Confirm the authenticated user has a saved_dashboards entry for this session
+    saved = (
+        db.table("saved_dashboards")
+        .select("id")
+        .eq("session_id", session_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    if not saved.data:
+        raise HTTPException(status_code=403, detail="Dashboard not found or access denied")
+
+    # Verify and unwrap the HMAC-signed session token → raw UUID
+    session_uuid = verify_session_id(session_id)
+
+    # Fetch the persisted session data
+    result = (
+        db.table("sessions")
+        .select("filename,column_summary,classifications,charts,governance")
+        .eq("session_id", session_uuid)
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Session data not found")
+
+    row = result.data[0]
+    return {
+        "filename": row["filename"],
+        "column_summary": row.get("column_summary") or [],
+        "classifications": row.get("classifications") or [],
+        "charts": row.get("charts") or [],
+        "governance": row.get("governance"),
+    }
 
 
 @router.delete("/dashboards/{dashboard_id}", status_code=204)

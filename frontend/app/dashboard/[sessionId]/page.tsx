@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import type { DashboardResponse, DataRow, ColumnClassification, ColumnSummary, ChartConfig } from '@/lib/types'
+import type { DashboardResponse, DataRow, ColumnClassification, ColumnSummary, ChartConfig, GovernanceEvent } from '@/lib/types'
 import GovernanceBadge from '@/components/ui/GovernanceBadge'
 import DashboardGrid from '@/components/dashboard/DashboardGrid'
 import DataTable from '@/components/dashboard/DataTable'
 import QAPanel from '@/components/qa/QAPanel'
 import { computeDataContext } from '@/lib/dataContext'
 import { useAuth } from '@/context/AuthContext'
-import { saveDashboard } from '@/lib/api'
+import { saveDashboard, restoreDashboard } from '@/lib/api'
 import { AuthModal } from '@/components/auth/AuthModal'
 
 interface SessionData {
@@ -86,10 +86,11 @@ export default function DashboardPage() {
   const params = useParams()
   const router = useRouter()
   const sessionId = params.sessionId as string
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isAuthLoading } = useAuth()
 
   const [data, setData] = useState<SessionData | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [restoredView, setRestoredView] = useState(false)
   const [showClassifications, setShowClassifications] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [authOpen, setAuthOpen] = useState(false)
@@ -112,18 +113,47 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    // Try sessionStorage first (populated during the original upload flow)
     const raw = sessionStorage.getItem(`dome_session_${sessionId}`)
-    if (!raw) { setNotFound(true); return }
-    try {
-      const parsed = JSON.parse(raw) as SessionData & { expiresAt?: number }
-      if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as SessionData & { expiresAt?: number }
+        if (!parsed.expiresAt || Date.now() <= parsed.expiresAt) {
+          setData(parsed)
+          return
+        }
         sessionStorage.removeItem(`dome_session_${sessionId}`)
-        setNotFound(true)
-        return
+      } catch {
+        // fall through to server restore
       }
-      setData(parsed)
-    } catch { setNotFound(true) }
-  }, [sessionId])
+    }
+
+    // sessionStorage miss — wait for auth to resolve before giving up
+    if (isAuthLoading) return
+
+    if (!isAuthenticated) {
+      setNotFound(true)
+      return
+    }
+
+    restoreDashboard(sessionId)
+      .then((restored) => {
+        const sessionData: SessionData = {
+          dashboard: {
+            session_id: sessionId,
+            classifications: restored.classifications,
+            charts: restored.charts,
+            governance: restored.governance as DashboardResponse['governance'],
+          },
+          filename: restored.filename,
+          rows: [],
+          columnSummary: restored.column_summary,
+        }
+        setData(sessionData)
+        setRestoredView(true)
+      })
+      .catch(() => setNotFound(true))
+  }, [sessionId, isAuthenticated, isAuthLoading])
 
   if (notFound) {
     return (
@@ -151,7 +181,8 @@ export default function DashboardPage() {
   }
 
   const { dashboard, filename, rows, columnSummary, loadedSheets = [], skippedSheets = [] } = data
-  const { classifications, charts, governance } = dashboard
+  const { classifications, charts } = dashboard
+  const governance = (dashboard.governance as GovernanceEvent | null)
   const dataContext = computeDataContext(rows, classifications)
 
   async function handleSave() {
@@ -241,8 +272,21 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Restored-view notice */}
+        {restoredView && (
+          <div className="rounded-lg border border-dome-border bg-dome-elevated px-4 py-2.5 text-xs text-dome-muted">
+            Charts and data table require the original file.{' '}
+            <button
+              onClick={() => router.push('/')}
+              className="underline hover:text-dome-text"
+            >
+              Re-upload to restore full view.
+            </button>
+          </div>
+        )}
+
         {/* Governance */}
-        <GovernanceBadge event={governance} />
+        {governance && <GovernanceBadge event={governance} />}
 
         {/* Charts — click a chart to highlight its columns in the data table */}
         <DashboardGrid

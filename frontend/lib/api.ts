@@ -5,6 +5,10 @@ import type {
   DashboardResponse,
   QARequest,
   QAResponse,
+  ColumnSummary,
+  ColumnClassification,
+  ChartConfig,
+  GovernanceEvent,
 } from '@/lib/types'
 import { authHeaders } from '@/lib/auth'
 
@@ -142,4 +146,16 @@ export async function saveDashboard(
 
 export async function deleteSavedDashboard(id: string): Promise<void> {
   await request<void>('DELETE', `/dashboards/${id}`)
+}
+
+export interface RestoredDashboard {
+  filename: string
+  column_summary: ColumnSummary[]
+  classifications: ColumnClassification[]
+  charts: ChartConfig[]
+  governance: GovernanceEvent | null
+}
+
+export async function restoreDashboard(sessionId: string): Promise<RestoredDashboard> {
+  return request<RestoredDashboard>('GET', `/dashboards/${sessionId}/restore`)
 }
