@@ -57,6 +57,25 @@ class SaveDashboardRequest(BaseModel):
 async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Request):
     user_id = _require_user(req)
     db = _require_db()
+
+    # Verify and unwrap the HMAC-signed session token → raw UUID
+    session_uuid = verify_session_id(session_id)
+
+    # Snapshot the full session data into saved_dashboards so that restores
+    # never depend on the sessions table being present later.
+    session_snapshot: dict = {}
+    try:
+        snap = (
+            db.table("sessions")
+            .select("column_summary,classifications,charts,governance")
+            .eq("session_id", session_uuid)
+            .execute()
+        )
+        if snap.data:
+            session_snapshot = snap.data[0]
+    except Exception:
+        pass  # best-effort; restore will fall back to sessions table
+
     try:
         now = datetime.now(timezone.utc).isoformat()
         row = {
@@ -67,6 +86,7 @@ async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Reque
             "chart_count": body.chart_count,
             "label": body.label,
             "saved_at": now,
+            "session_data": session_snapshot if session_snapshot else None,
         }
         db.table("saved_dashboards").insert(row).execute()
         return {"saved": True, "saved_at": now}
@@ -98,10 +118,10 @@ async def restore_dashboard(session_id: str, req: Request):
     user_id = _require_user(req)
     db = _require_db()
 
-    # Confirm the authenticated user has a saved_dashboards entry for this session
+    # Fetch the saved record (confirms ownership and provides the snapshot)
     saved = (
         db.table("saved_dashboards")
-        .select("id")
+        .select("filename,session_data")
         .eq("session_id", session_id)
         .eq("user_id", user_id)
         .execute()
@@ -109,10 +129,21 @@ async def restore_dashboard(session_id: str, req: Request):
     if not saved.data:
         raise HTTPException(status_code=403, detail="Dashboard not found or access denied")
 
-    # Verify and unwrap the HMAC-signed session token → raw UUID
-    session_uuid = verify_session_id(session_id)
+    row = saved.data[0]
 
-    # Fetch the persisted session data
+    # Fast path: session data was snapshotted at save time — no sessions table needed
+    sd = row.get("session_data")
+    if sd:
+        return {
+            "filename": row["filename"],
+            "column_summary": sd.get("column_summary") or [],
+            "classifications": sd.get("classifications") or [],
+            "charts": sd.get("charts") or [],
+            "governance": sd.get("governance"),
+        }
+
+    # Legacy path: older saves didn't store the snapshot → fall back to sessions table
+    session_uuid = verify_session_id(session_id)
     result = (
         db.table("sessions")
         .select("filename,column_summary,classifications,charts,governance")

@@ -261,10 +261,6 @@ export default function DataTable({
         </div>
       )}
 
-      {/* Zero-retention disclosure */}
-      <p className="governance-banner text-center">
-        Your data has not been uploaded — all rows are processed locally in your browser
-      </p>
     </div>
   )
 }

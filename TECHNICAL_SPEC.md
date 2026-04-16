@@ -636,7 +636,6 @@ def fire_rules(classifications: list[ColumnClassification]) -> list[ChartConfig]
 - **Pagination:** 50 rows per page
 - **Sorting:** Click column header to sort asc/desc
 - **Column highlighting:** When a chart is active, columns it references receive accent-cyan header underline
-- **Disclosure banner:** `"YOUR DATA HAS NOT BEEN UPLOADED — ALL ROWS ARE PROCESSED LOCALLY IN YOUR BROWSER"` — JetBrains Mono, 11px, accent-cyan, uppercase
 - **Export:** "Download CSV" button re-exports rows from React state via Blob URL
 
 ---
