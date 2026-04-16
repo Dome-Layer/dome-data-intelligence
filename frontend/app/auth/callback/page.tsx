@@ -2,34 +2,44 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { getToken } from "@/lib/auth";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { signIn } = useAuth();
 
   useEffect(() => {
-    // Supabase redirects with the token in the URL fragment:
-    // /#access_token=...&token_type=bearer&expires_in=...
-    const hash = window.location.hash.slice(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get("access_token");
-    const expiresIn = params.get("expires_in");
-
-    if (accessToken) {
-      const expiresAt = expiresIn
-        ? new Date(Date.now() + parseInt(expiresIn, 10) * 1000).toISOString()
-        : undefined;
-      signIn(accessToken, expiresAt);
+    // Cookie was already set by domelayer.com/auth/callback.
+    // Just verify it exists and redirect home.
+    if (getToken()) {
+      router.replace("/");
+    } else {
+      // Cookie not found — send to central login
+      window.location.href = `https://domelayer.com/login?redirect=${encodeURIComponent(window.location.origin)}`;
     }
-
-    router.replace("/");
-  }, [router, signIn]);
+  }, [router]);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: "12px" }}>
-      <span className="spinner" />
-      <span className="eyebrow">Signing in…</span>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--color-bg-base, #fff)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          width: "24px",
+          height: "24px",
+          border: "2px solid #E8E8E8",
+          borderTopColor: "#0080FF",
+          borderRadius: "50%",
+          animation: "spin 600ms linear infinite",
+        }}
+      />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

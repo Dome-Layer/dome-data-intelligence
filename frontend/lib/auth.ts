@@ -1,6 +1,8 @@
 // Cookie-based cross-subdomain token storage.
 // The Supabase JWT is set as a .domelayer.com cookie so all
 // *.domelayer.com subdomains share authentication (SSO).
+// The cookie is not HttpOnly by design — JS must read it to build
+// the Authorization header sent to each tool's backend.
 
 const COOKIE_NAME = "dome_auth_token";
 
@@ -50,4 +52,8 @@ export function clearToken(): void {
 export function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export function isAuthenticated(): boolean {
+  return !!getToken();
 }

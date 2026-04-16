@@ -1,26 +1,10 @@
-"""Auth endpoints — magic-link via Supabase and session deletion."""
+"""Auth endpoints — session deletion."""
 
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, Request
 
 from app.core.db import get_supabase_client
 
 router = APIRouter()
-
-
-class MagicLinkRequest(BaseModel):
-    email: str
-
-
-@router.post("/auth/magic-link", status_code=204)
-async def request_magic_link(body: MagicLinkRequest):
-    db = get_supabase_client()
-    if db is None:
-        raise HTTPException(status_code=503, detail="Auth not configured")
-    try:
-        db.auth.sign_in_with_otp({"email": body.email})
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail="Failed to send magic link") from exc
 
 
 @router.delete("/auth/session", status_code=204)

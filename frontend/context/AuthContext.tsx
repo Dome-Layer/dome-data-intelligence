@@ -9,29 +9,24 @@ import {
   type ReactNode,
 } from "react";
 import { getToken, setToken, clearToken } from "@/lib/auth";
-import { deleteSession } from "@/lib/api";
 
 interface AuthState {
   isAuthenticated: boolean;
-  isAuthLoading: boolean;
   signIn: (token: string, expiresAt?: string) => void;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState>({
   isAuthenticated: false,
-  isAuthLoading: true,
   signIn: () => {},
   signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
     setIsAuthenticated(!!getToken());
-    setIsAuthLoading(false);
   }, []);
 
   const signIn = useCallback((newToken: string, expiresAt?: string) => {
@@ -40,17 +35,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    try {
-      await deleteSession();
-    } catch {
-      // best-effort
+    const token = getToken();
+    if (token) {
+      try {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_AUTH_BACKEND}/api/v1/auth/session`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } catch {
+        // best-effort
+      }
     }
     clearToken();
     setIsAuthenticated(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isAuthLoading, signIn, signOut }}>
+    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

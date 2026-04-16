@@ -10,6 +10,7 @@ import DataTable from '@/components/dashboard/DataTable'
 import QAPanel from '@/components/qa/QAPanel'
 import { computeDataContext } from '@/lib/dataContext'
 import { useAuth } from '@/context/AuthContext'
+import { getToken } from '@/lib/auth'
 import { saveDashboard, restoreDashboard } from '@/lib/api'
 import { AuthModal } from '@/components/auth/AuthModal'
 
@@ -86,7 +87,7 @@ export default function DashboardPage() {
   const params = useParams()
   const router = useRouter()
   const sessionId = params.sessionId as string
-  const { isAuthenticated, isAuthLoading } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   const [data, setData] = useState<SessionData | null>(null)
   const [notFound, setNotFound] = useState(false)
@@ -128,10 +129,8 @@ export default function DashboardPage() {
       }
     }
 
-    // sessionStorage miss — wait for auth to resolve before giving up
-    if (isAuthLoading) return
-
-    if (!isAuthenticated) {
+    // sessionStorage miss — check cookie directly (synchronous, no race condition)
+    if (!getToken()) {
       setNotFound(true)
       return
     }
@@ -153,7 +152,7 @@ export default function DashboardPage() {
         setRestoredView(true)
       })
       .catch(() => setNotFound(true))
-  }, [sessionId, isAuthenticated, isAuthLoading])
+  }, [sessionId, isAuthenticated])
 
   if (notFound) {
     return (
