@@ -7,6 +7,7 @@ import UploadProgress from '@/components/upload/UploadProgress'
 import { uploadSummary, generateDashboard, APIError } from '@/lib/api'
 import { parseFile, loadDemoFile } from '@/lib/fileParser'
 import type { ParsedFile } from '@/lib/types'
+import AuthGuard from '@/components/AuthGuard'
 
 type UploadStep = 'parsing' | 'uploading' | 'classifying' | 'done'
 
@@ -126,6 +127,7 @@ export default function UploadPage() {
   const isRunning = state.status === 'running'
 
   return (
+    <AuthGuard>
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-xl">
 
@@ -188,5 +190,6 @@ export default function UploadPage() {
 
       </div>
     </main>
+    </AuthGuard>
   )
 }

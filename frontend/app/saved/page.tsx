@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { listSavedDashboards, deleteSavedDashboard, type SavedDashboard } from "@/lib/api";
+import AuthGuard from "@/components/AuthGuard";
 
 function DashboardRow({
   item,
@@ -118,17 +118,11 @@ function DashboardRow({
 }
 
 export default function SavedPage() {
-  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState<SavedDashboard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
-
     listSavedDashboards()
       .then((res) => {
         setItems(res.dashboards);
@@ -145,6 +139,7 @@ export default function SavedPage() {
   }
 
   return (
+    <AuthGuard>
     <div style={{ maxWidth: "1152px", margin: "0 auto", padding: "48px 32px" }}>
       <div style={{ marginBottom: "32px" }}>
         <p className="eyebrow" style={{ marginBottom: "8px" }}>Library</p>
@@ -160,31 +155,14 @@ export default function SavedPage() {
         </h1>
       </div>
 
-      {!isAuthenticated && (
-        <div style={{
-          background: "var(--color-bg-muted)",
-          border: "0.5px solid var(--color-border-default)",
-          borderRadius: "var(--radius-lg)",
-          padding: "32px",
-          textAlign: "center",
-        }}>
-          <p style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-secondary)", marginBottom: "16px" }}>
-            Sign in to view your saved dashboards.
-          </p>
-          <Link href="/" style={{ color: "var(--color-accent)", fontSize: "var(--text-body-sm)", textDecoration: "none" }}>
-            ← Back to home
-          </Link>
-        </div>
-      )}
-
-      {isAuthenticated && loading && (
+      {loading && (
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "48px 0" }}>
           <span className="spinner" />
           <span className="eyebrow">Loading</span>
         </div>
       )}
 
-      {isAuthenticated && error && (
+      {error && (
         <div style={{
           background: "var(--color-error-subtle)",
           border: "0.5px solid var(--color-error-border)",
@@ -196,7 +174,7 @@ export default function SavedPage() {
         </div>
       )}
 
-      {isAuthenticated && !loading && !error && items.length === 0 && (
+      {!loading && !error && items.length === 0 && (
         <div style={{
           background: "var(--color-bg-muted)",
           border: "0.5px solid var(--color-border-default)",
@@ -213,7 +191,7 @@ export default function SavedPage() {
         </div>
       )}
 
-      {isAuthenticated && !loading && !error && items.length > 0 && (
+      {!loading && !error && items.length > 0 && (
         <div style={{
           background: "var(--color-bg-base)",
           border: "0.5px solid var(--color-border-default)",
@@ -226,5 +204,6 @@ export default function SavedPage() {
         </div>
       )}
     </div>
+    </AuthGuard>
   );
 }

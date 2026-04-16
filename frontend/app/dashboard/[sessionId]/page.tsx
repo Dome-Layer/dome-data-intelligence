@@ -12,7 +12,6 @@ import { computeDataContext } from '@/lib/dataContext'
 import { useAuth } from '@/context/AuthContext'
 import { getToken } from '@/lib/auth'
 import { saveDashboard, restoreDashboard } from '@/lib/api'
-import { AuthModal } from '@/components/auth/AuthModal'
 
 interface SessionData {
   dashboard: DashboardResponse
@@ -94,7 +93,6 @@ export default function DashboardPage() {
   const [restoredView, setRestoredView] = useState(false)
   const [showClassifications, setShowClassifications] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
-  const [authOpen, setAuthOpen] = useState(false)
 
   // Column highlight bridge
   const [activeChartId, setActiveChartId] = useState<string | null>(null)
@@ -186,7 +184,8 @@ export default function DashboardPage() {
 
   async function handleSave() {
     if (!isAuthenticated) {
-      setAuthOpen(true)
+      const returnUrl = encodeURIComponent(window.location.href);
+      window.location.href = `https://domelayer.com/login?redirect=${returnUrl}`;
       return
     }
     setSaveStatus('saving')
@@ -205,8 +204,6 @@ export default function DashboardPage() {
 
   return (
     <>
-    {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
-
     {/* QAPanel is position:fixed — renders outside the scroll flow */}
     <QAPanel
       sessionId={sessionId}

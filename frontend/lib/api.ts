@@ -113,10 +113,6 @@ export async function askQuestion(body: QARequest): Promise<QAResponse> {
 
 // ─── Auth endpoints ───────────────────────────────────────────────
 
-export async function requestMagicLink(payload: { email: string }): Promise<void> {
-  await request<void>('POST', '/auth/magic-link', payload)
-}
-
 export async function deleteSession(): Promise<void> {
   await request<void>('DELETE', '/auth/session')
 }
