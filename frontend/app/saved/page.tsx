@@ -132,7 +132,7 @@ export default function SavedPage() {
         setError(err instanceof Error ? err.message : "Failed to load saved dashboards.");
         setLoading(false);
       });
-  }, [isAuthenticated]);
+  }, []);
 
   function handleDelete(id: string) {
     setItems((prev) => prev.filter((d) => d.id !== id));
