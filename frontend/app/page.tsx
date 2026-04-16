@@ -181,13 +181,6 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Zero-retention notice */}
-        <div className="mt-10 text-center">
-          <p className="governance-banner">
-            Your data is never uploaded — all rows are processed locally in your browser
-          </p>
-        </div>
-
       </div>
     </main>
     </AuthGuard>
