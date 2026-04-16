@@ -37,21 +37,66 @@ export function computeDataContext(
     sections.push(`Total ${m.column_name}: ${fmt(total)}${unit} (${count} non-null values)`)
   }
 
+  // ── Row count per category ─────────────────────────────────────────────────
+  // Provides per-group order/record counts so the LLM never conflates the
+  // global "Total rows" with the count for a specific group.
+  for (const cat of cats) {
+    const counts: Record<string, number> = {}
+    for (const row of rows) {
+      const key = row[cat.column_name] != null ? String(row[cat.column_name]) : '(blank)'
+      counts[key] = (counts[key] ?? 0) + 1
+    }
+    const sorted = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_GROUPS)
+    const lines = sorted.map(([k, v]) => `  ${k}: ${v}`)
+    sections.push(`Row count by ${cat.column_name}:\n${lines.join('\n')}`)
+  }
+
+  // ── Unique category values per group ───────────────────────────────────────
+  // For each low-cardinality category pair, shows how many distinct values of
+  // the inner column exist per outer-column group (e.g. "Unique Customer_ID per
+  // Region: South: 1"). Lets the LLM say "exclusively" vs "primarily".
+  for (const outer of cats.filter((c) => c.unique_count <= 20)) {
+    for (const inner of cats.filter((c) => c.column_name !== outer.column_name)) {
+      const unique: Record<string, Set<string>> = {}
+      for (const row of rows) {
+        const ok = row[outer.column_name] != null ? String(row[outer.column_name]) : '(blank)'
+        const ik = row[inner.column_name] != null ? String(row[inner.column_name]) : '(blank)'
+        if (!unique[ok]) unique[ok] = new Set()
+        unique[ok].add(ik)
+      }
+      const sorted = Object.entries(unique)
+        .sort((a, b) => b[1].size - a[1].size)
+        .slice(0, MAX_GROUPS)
+      const lines = sorted.map(([k, s]) => `  ${k}: ${s.size}`)
+      sections.push(`Unique ${inner.column_name} per ${outer.column_name}:\n${lines.join('\n')}`)
+    }
+  }
+
   // ── Metric × category breakdowns ──────────────────────────────────────────
+  // Each line shows both the group SUM and the average per row so the LLM
+  // never mistakes a sum of rate/ratio values for an average.
   for (const cat of cats) {
     for (const m of metrics) {
-      const groups: Record<string, number> = {}
+      const groups: Record<string, { sum: number; count: number }> = {}
       for (const row of rows) {
         const key = row[cat.column_name] != null ? String(row[cat.column_name]) : '(blank)'
         const v   = Number(row[m.column_name])
-        if (!isNaN(v)) groups[key] = (groups[key] ?? 0) + v
+        if (!isNaN(v)) {
+          if (!groups[key]) groups[key] = { sum: 0, count: 0 }
+          groups[key].sum   += v
+          groups[key].count += 1
+        }
       }
       const sorted = Object.entries(groups)
-        .sort((a, b) => b[1] - a[1])
+        .sort((a, b) => b[1].sum - a[1].sum)
         .slice(0, MAX_GROUPS)
-      const unit = m.unit ? ` ${m.unit}` : ''
-      const lines = sorted.map(([k, v]) => `  ${k}: ${fmt(v)}${unit}`)
-      sections.push(`${m.column_name} by ${cat.column_name}:\n${lines.join('\n')}`)
+      const unit  = m.unit ? ` ${m.unit}` : ''
+      const lines = sorted.map(([k, { sum, count }]) =>
+        `  ${k}: ${fmt(sum)}${unit} (avg per row: ${fmt(sum / count)}${unit})`,
+      )
+      sections.push(`${m.column_name} by ${cat.column_name} (sum · avg per row):\n${lines.join('\n')}`)
     }
   }
 
@@ -74,7 +119,7 @@ export function computeDataContext(
     }
   }
 
-  // ── Metric × category × month (three-way, only when ≤3 categories and date exists) ──
+  // ── Metric × category × month (three-way, only when ≤20 categories and date exists) ──
   if (dates.length > 0 && cats.length > 0) {
     for (const d of dates) {
       for (const cat of cats.filter((c) => c.unique_count <= 20)) {
