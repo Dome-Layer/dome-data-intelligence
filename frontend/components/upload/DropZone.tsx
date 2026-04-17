@@ -93,6 +93,9 @@ export default function DropZone({ onParsed, onError, disabled }: DropZoneProps)
         <p className="mt-1 text-sm text-dome-muted">
           CSV · XLSX · XLS · XLSM · XLSB
         </p>
+        <p className="mt-1 text-xs text-dome-muted">
+          Up to 50 MB · Raw rows never leave your browser
+        </p>
       </div>
 
       <span className="rounded-lg border border-dome-border bg-dome-elevated px-4 py-2 text-sm font-medium text-dome-text transition-colors hover:border-dome-border-accent hover:text-dome-accent">

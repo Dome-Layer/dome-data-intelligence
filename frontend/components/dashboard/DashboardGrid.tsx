@@ -39,9 +39,8 @@ export default function DashboardGrid({
   activeChartId,
   onChartClick,
 }: DashboardGridProps) {
-  const kpiCharts    = charts.filter((c) => c.chart_type === 'kpi')
-  const tableCharts  = charts.filter((c) => c.chart_type === 'summary_table')
-  const otherCharts  = charts.filter(
+  const kpiCharts   = charts.filter((c) => c.chart_type === 'kpi')
+  const otherCharts = charts.filter(
     (c) => c.chart_type !== 'kpi' && c.chart_type !== 'summary_table',
   )
 
@@ -79,8 +78,6 @@ export default function DashboardGrid({
         </div>
       )}
 
-      {/* Summary table — always full width */}
-      {tableCharts.map((chart) => chartWrapper(chart, renderChart(chartProps(chart))))}
     </div>
   )
 }

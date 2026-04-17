@@ -182,6 +182,13 @@ async function detectIsExcel(file: File): Promise<boolean> {
 }
 
 export async function parseFile(file: File): Promise<ParsedFile> {
+  const MAX_SIZE = 50 * 1024 * 1024
+  if (file.size > MAX_SIZE) {
+    throw new Error(
+      `File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 50 MB.`,
+    )
+  }
+
   const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
 
   if (!SUPPORTED_EXTENSIONS.includes(ext)) {

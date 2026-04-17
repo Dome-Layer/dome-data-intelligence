@@ -3,15 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import type { DashboardResponse, DataRow, ColumnClassification, ColumnSummary, ChartConfig, GovernanceEvent } from '@/lib/types'
+import type { DashboardResponse, DataRow, ColumnSummary, ChartConfig, GovernanceEvent } from '@/lib/types'
 import GovernanceBadge from '@/components/ui/GovernanceBadge'
 import DashboardGrid from '@/components/dashboard/DashboardGrid'
 import DataTable from '@/components/dashboard/DataTable'
+import ColumnProfileTable from '@/components/dashboard/ColumnProfileTable'
 import QAPanel from '@/components/qa/QAPanel'
 import { computeDataContext } from '@/lib/dataContext'
 import { useAuth } from '@/context/AuthContext'
 import { getToken } from '@/lib/auth'
-import { saveDashboard, restoreDashboard } from '@/lib/api'
+import Papa from 'papaparse'
+import { saveDashboard, restoreDashboard, uploadDashboardData } from '@/lib/api'
 
 interface SessionData {
   dashboard: DashboardResponse
@@ -22,63 +24,6 @@ interface SessionData {
   skippedSheets?: string[]
 }
 
-const TYPE_COLOURS: Record<string, string> = {
-  date:             'text-dome-accent bg-dome-accent-subtle ring-dome-border-accent',
-  ordered_category: 'text-dome-muted bg-dome-elevated ring-dome-border',
-  category:         'text-dome-warning bg-dome-warning-subtle ring-dome-warning-border',
-  metric:           'text-dome-success bg-dome-success-subtle ring-dome-success-border',
-}
-
-function ClassificationsTable({ cols }: { cols: ColumnClassification[] }) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-dome-border">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-dome-border bg-dome-elevated">
-            {['Column', 'Type', 'Unique', 'Unit', 'Note'].map((h) => (
-              <th
-                key={h}
-                className="px-3 py-2 text-left font-mono text-xs font-medium text-dome-muted"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-dome-surface">
-          {cols.map((col) => {
-            const colour =
-              TYPE_COLOURS[col.classified_type] ??
-              'text-dome-muted bg-dome-elevated ring-dome-border'
-            return (
-              <tr key={col.column_name} className="border-b border-dome-border last:border-0">
-                <td className="px-3 py-2 font-mono text-sm text-dome-text">
-                  {col.column_name}
-                </td>
-                <td className="px-3 py-2">
-                  <span
-                    className={`inline-flex rounded px-1.5 py-0.5 font-mono text-xs ring-1 ${colour}`}
-                  >
-                    {col.classified_type}
-                  </span>
-                </td>
-                <td className="px-3 py-2 font-mono text-xs text-dome-muted">
-                  {col.unique_count}
-                </td>
-                <td className="px-3 py-2 font-mono text-xs text-dome-muted">
-                  {col.unit ?? '—'}
-                </td>
-                <td className="px-3 py-2 font-mono text-xs text-dome-muted">
-                  {col.note ?? '—'}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
-}
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -91,7 +36,8 @@ export default function DashboardPage() {
   const [data, setData] = useState<SessionData | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [restoredView, setRestoredView] = useState(false)
-  const [showClassifications, setShowClassifications] = useState(false)
+  const [showColumnProfile, setShowColumnProfile] = useState(true)
+  const [showRawData, setShowRawData] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
 
   // Column highlight bridge
@@ -134,7 +80,26 @@ export default function DashboardPage() {
     }
 
     restoreDashboard(sessionId)
-      .then((restored) => {
+      .then(async (restored) => {
+        let restoredRows: DataRow[] = []
+
+        if (restored.data_url) {
+          try {
+            const csvRes = await fetch(restored.data_url)
+            const csvText = await csvRes.text()
+            const parsed = Papa.parse<DataRow>(csvText, {
+              header: true,
+              dynamicTyping: true,
+              skipEmptyLines: true,
+            })
+            if (parsed.data.length > 0) {
+              restoredRows = parsed.data
+            }
+          } catch {
+            // non-fatal — degrade to metadata-only view
+          }
+        }
+
         const sessionData: SessionData = {
           dashboard: {
             session_id: sessionId,
@@ -143,11 +108,11 @@ export default function DashboardPage() {
             governance: restored.governance as DashboardResponse['governance'],
           },
           filename: restored.filename,
-          rows: [],
+          rows: restoredRows,
           columnSummary: restored.column_summary,
         }
         setData(sessionData)
-        setRestoredView(true)
+        if (restoredRows.length === 0) setRestoredView(true)
       })
       .catch(() => setNotFound(true))
   }, [sessionId, isAuthenticated])
@@ -182,6 +147,21 @@ export default function DashboardPage() {
   const governance = (dashboard.governance as GovernanceEvent | null)
   const dataContext = computeDataContext(rows, classifications)
 
+  function rowsToCSV(dataRows: DataRow[]): string {
+    if (dataRows.length === 0) return ''
+    const cols = Object.keys(dataRows[0])
+    const header = cols.map((c) => `"${c.replace(/"/g, '""')}"`).join(',')
+    const body = dataRows.map((row) =>
+      cols.map((c) => {
+        const v = row[c]
+        if (v == null) return ''
+        if (typeof v === 'string') return `"${v.replace(/"/g, '""')}"`
+        return String(v)
+      }).join(','),
+    ).join('\n')
+    return `${header}\n${body}`
+  }
+
   async function handleSave() {
     if (!isAuthenticated) {
       const returnUrl = encodeURIComponent(window.location.href);
@@ -195,6 +175,11 @@ export default function DashboardPage() {
         column_count: classifications.length,
         chart_count: charts.length,
       })
+      // Upload raw rows to Supabase Storage — fire-and-forget, non-blocking
+      if (rows.length > 0) {
+        const csv = rowsToCSV(rows)
+        uploadDashboardData(sessionId, csv).catch(() => {})
+      }
       setSaveStatus('saved')
     } catch {
       setSaveStatus('error')
@@ -293,19 +278,19 @@ export default function DashboardPage() {
           onChartClick={handleChartClick}
         />
 
-        {/* Column classifications — collapsible */}
+        {/* Column Profile — open by default */}
         <div className="rounded-lg border border-dome-border bg-dome-surface">
           <button
-            onClick={() => setShowClassifications((v) => !v)}
+            onClick={() => setShowColumnProfile((v) => !v)}
             className="flex w-full items-center justify-between px-4 py-3 text-left"
           >
             <span className="text-xs font-medium uppercase tracking-widest text-dome-muted">
-              Column Classifications ({classifications.length})
+              Column Profile ({classifications.length} columns)
             </span>
             <svg
               className={[
                 'h-4 w-4 text-dome-muted transition-transform',
-                showClassifications ? 'rotate-180' : '',
+                showColumnProfile ? 'rotate-180' : '',
               ].join(' ')}
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -317,19 +302,53 @@ export default function DashboardPage() {
               />
             </svg>
           </button>
-          {showClassifications && (
+          {showColumnProfile && (
             <div className="border-t border-dome-border px-4 pb-4 pt-3">
-              <ClassificationsTable cols={classifications} />
+              <ColumnProfileTable
+                classifications={classifications}
+                columnSummary={columnSummary ?? []}
+                rowCount={rows.length}
+              />
             </div>
           )}
         </div>
 
-        {/* Raw data table */}
-        <DataTable
-          rows={rows}
-          filename={filename}
-          highlightColumns={highlightColumns}
-        />
+        {/* Raw Data — collapsed by default; hidden if no rows (restored view) */}
+        {rows.length > 0 && <div className="rounded-lg border border-dome-border bg-dome-surface">
+          <button
+            onClick={() => setShowRawData((v) => !v)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left"
+          >
+            <span className="text-xs font-medium uppercase tracking-widest text-dome-muted">
+              Raw Data {rows.length > 0 ? `(${rows.length.toLocaleString()} rows)` : ''}
+            </span>
+            <svg
+              className={[
+                'h-4 w-4 text-dome-muted transition-transform',
+                showRawData ? 'rotate-180' : '',
+              ].join(' ')}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+          {showRawData && (
+            <div className="border-t border-dome-border px-4 pb-4 pt-3">
+              <DataTable
+                rows={rows}
+                filename={filename}
+                highlightColumns={highlightColumns}
+                showCsvDownload={false}
+                classifications={classifications}
+              />
+            </div>
+          )}
+        </div>}
 
 
       </div>

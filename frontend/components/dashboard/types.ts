@@ -52,6 +52,24 @@ export function fmtAxis(n: number): string {
   return `${sign}${abs.toLocaleString('en-GB', { maximumFractionDigits: 1 })}`
 }
 
+/**
+ * Returns a tick formatter for date x-axes. Chooses "Jan '24" vs "15 Jan" based on data span.
+ */
+export function makeDateTickFormatter(xValues: string[]): (v: string) => string {
+  const times = xValues
+    .map((s) => new Date(s).getTime())
+    .filter((t) => isFinite(t))
+  if (times.length === 0) return (v) => v
+  const spanDays = (Math.max(...times) - Math.min(...times)) / 86_400_000
+  return (v: string) => {
+    const d = new Date(v)
+    if (isNaN(d.getTime())) return v
+    return spanDays > 365
+      ? d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
+      : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+  }
+}
+
 export function fmtValue(n: number, unit?: string | null): string {
   if (!isFinite(n)) return '—'
   const prefix = unit === 'EUR' ? '€' : unit === 'USD' ? '$' : unit === 'GBP' ? '£' : ''

@@ -20,17 +20,17 @@ const DEMO_DATASETS = [
   {
     filename: 'commodity_position_report.csv',
     label: 'Commodity Position',
-    description: '28 rows · Trade Finance · R-01 R-02 R-03 R-05 R-06 R-07',
+    description: '28 rows · Trade Finance',
   },
   {
     filename: 'it_budget_vs_actuals.csv',
     label: 'IT Budget vs Actuals',
-    description: '96 rows · IT Finance · R-02 R-03 R-05 R-06 R-07',
+    description: '96 rows · IT Finance',
   },
   {
     filename: 'procurement_spend_by_supplier.csv',
     label: 'Procurement Spend',
-    description: '135 rows · Procurement · R-02 R-03 R-05 R-06 R-07',
+    description: '135 rows · Procurement',
   },
 ]
 

@@ -11,7 +11,7 @@ import {
   Cell,
 } from 'recharts'
 import RuleBadge from '@/components/ui/RuleBadge'
-import { AXIS_TICK, GRID_PROPS, TOOLTIP_STYLE, fmtAxis, fmtValue } from './types'
+import { AXIS_TICK, GRID_PROPS, TOOLTIP_STYLE, fmtAxis, fmtValue, makeDateTickFormatter } from './types'
 import EmptyChart from './EmptyChart'
 import type { ChartProps } from './types'
 
@@ -37,7 +37,10 @@ export default function BarChart({ chart, rows, classifications }: ChartProps) {
 
   if (data.length === 0) return <EmptyChart />
 
-  const tickFormatter = (v: string) => (v.length > 12 ? `${v.slice(0, 11)}…` : v)
+  const isDateCol = classifications.find((c) => c.column_name === xCol)?.classified_type === 'date'
+  const tickFormatter = isDateCol
+    ? makeDateTickFormatter(data.map((d) => d.x))
+    : (v: string) => (v.length > 12 ? `${v.slice(0, 11)}…` : v)
 
   return (
     <div className="rounded-lg border border-dome-border bg-dome-surface p-4 shadow-sm">

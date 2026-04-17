@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
 from app.core.auth import verify_session_id
@@ -121,7 +121,7 @@ async def restore_dashboard(session_id: str, req: Request):
     # Fetch the saved record (confirms ownership and provides the snapshot)
     saved = (
         db.table("saved_dashboards")
-        .select("filename,session_data")
+        .select("filename,session_data,data_file")
         .eq("session_id", session_id)
         .eq("user_id", user_id)
         .execute()
@@ -131,36 +131,97 @@ async def restore_dashboard(session_id: str, req: Request):
 
     row = saved.data[0]
 
-    # Fast path: session data was snapshotted at save time — no sessions table needed
+    # Build the response from the session_data snapshot or legacy sessions table
     sd = row.get("session_data")
     if sd:
-        return {
+        response = {
             "filename": row["filename"],
             "column_summary": sd.get("column_summary") or [],
             "classifications": sd.get("classifications") or [],
             "charts": sd.get("charts") or [],
             "governance": sd.get("governance"),
         }
+    else:
+        # Legacy path: older saves didn't store the snapshot → fall back to sessions table
+        session_uuid = verify_session_id(session_id)
+        result = (
+            db.table("sessions")
+            .select("filename,column_summary,classifications,charts,governance")
+            .eq("session_id", session_uuid)
+            .execute()
+        )
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Session data not found")
+        legacy = result.data[0]
+        response = {
+            "filename": legacy["filename"],
+            "column_summary": legacy.get("column_summary") or [],
+            "classifications": legacy.get("classifications") or [],
+            "charts": legacy.get("charts") or [],
+            "governance": legacy.get("governance"),
+        }
 
-    # Legacy path: older saves didn't store the snapshot → fall back to sessions table
-    session_uuid = verify_session_id(session_id)
-    result = (
-        db.table("sessions")
-        .select("filename,column_summary,classifications,charts,governance")
-        .eq("session_id", session_uuid)
+    # If raw data was uploaded to Storage, return a 1-hour signed URL
+    data_file = row.get("data_file")
+    if data_file:
+        try:
+            signed = db.storage.from_("dashboard-data").create_signed_url(
+                path=data_file,
+                expires_in=3600,
+            )
+            # supabase-py returns {"signedURL": "..."} or {"signed_url": "..."} depending on version
+            url = (signed or {}).get("signedURL") or (signed or {}).get("signed_url")
+            if url:
+                response["data_url"] = url
+        except Exception:
+            pass  # non-fatal — frontend degrades to metadata-only view
+
+    return response
+
+
+@router.post("/dashboards/{session_id}/data")
+async def upload_dashboard_data(
+    session_id: str,
+    req: Request,
+    file: UploadFile = File(...),
+):
+    """Upload raw CSV data for a saved dashboard to Supabase Storage."""
+    user_id = _require_user(req)
+    db = _require_db()
+
+    # Confirm the user owns this saved dashboard
+    saved = (
+        db.table("saved_dashboards")
+        .select("id")
+        .eq("session_id", session_id)
+        .eq("user_id", user_id)
         .execute()
     )
-    if not result.data:
-        raise HTTPException(status_code=404, detail="Session data not found")
+    if not saved.data:
+        raise HTTPException(status_code=403, detail="Dashboard not found or access denied")
 
-    row = result.data[0]
-    return {
-        "filename": row["filename"],
-        "column_summary": row.get("column_summary") or [],
-        "classifications": row.get("classifications") or [],
-        "charts": row.get("charts") or [],
-        "governance": row.get("governance"),
-    }
+    session_uuid = verify_session_id(session_id)
+    storage_path = f"{user_id}/{session_uuid}/data.csv"
+    csv_content = await file.read()
+
+    try:
+        db.storage.from_("dashboard-data").upload(
+            path=storage_path,
+            file=csv_content,
+            file_options={"content-type": "text/csv", "upsert": "true"},
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to upload data to storage") from exc
+
+    # Store the path so the restore endpoint can generate signed URLs later
+    try:
+        db.table("saved_dashboards").update({"data_file": storage_path}).eq(
+            "session_id", session_id
+        ).eq("user_id", user_id).execute()
+    except Exception:
+        pass  # best-effort
+
+    return {"uploaded": True}
 
 
 @router.delete("/dashboards/{dashboard_id}", status_code=204)

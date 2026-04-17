@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import RuleBadge from '@/components/ui/RuleBadge'
-import { AXIS_TICK, GRID_PROPS, TOOLTIP_STYLE, fmtAxis, fmtValue } from './types'
+import { AXIS_TICK, GRID_PROPS, TOOLTIP_STYLE, fmtAxis, fmtValue, makeDateTickFormatter } from './types'
 import EmptyChart from './EmptyChart'
 import type { ChartProps } from './types'
 
@@ -33,6 +33,11 @@ export default function LineChart({ chart, rows, classifications }: ChartProps) 
 
   if (data.length === 0) return <EmptyChart />
 
+  const isDateCol = classifications.find((c) => c.column_name === xCol)?.classified_type === 'date'
+  const xTickFormatter = isDateCol
+    ? makeDateTickFormatter(data.map((d) => d.x))
+    : (v: string) => (v.length > 12 ? `${v.slice(0, 11)}…` : v)
+
   return (
     <div className="rounded-lg border border-dome-border bg-dome-surface p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -50,6 +55,7 @@ export default function LineChart({ chart, rows, classifications }: ChartProps) 
             tickLine={false}
             axisLine={{ stroke: '#e2e8f0' }}
             interval="preserveStartEnd"
+            tickFormatter={xTickFormatter}
           />
           <YAxis
             tick={AXIS_TICK}

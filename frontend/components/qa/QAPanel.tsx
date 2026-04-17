@@ -139,7 +139,7 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
   ) : null
 
   const inputArea = (
-    <div className="shrink-0 border-t border-dome-border px-3 py-3">
+    <div className="shrink-0 border-t border-dome-border px-3 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
       <div className="flex items-end gap-2">
         <textarea
           value={input}
@@ -181,15 +181,21 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
       </div>
 
       {/* ── Mobile bottom sheet (< lg) — fixed bottom ── */}
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-dome-border bg-dome-surface shadow-xl lg:hidden">
+      <div
+        className="fixed inset-x-0 bottom-0 z-[100] border-t-2 border-dome-accent bg-dome-surface shadow-2xl lg:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <button
           onClick={() => setMobileOpen((v) => !v)}
-          className="flex w-full items-center justify-between px-4 py-3"
+          className="flex w-full items-center justify-between bg-dome-elevated px-4 py-4"
         >
-          <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-dome-muted">
+          <span className="flex items-center gap-2 text-sm font-semibold text-dome-text">
+            <svg className="h-4 w-4 text-dome-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
             Ask about your data
             {unreadCount > 0 && !mobileOpen && (
-              <span className="rounded-full bg-dome-accent px-1.5 py-0.5 font-mono text-[10px] font-medium text-white">
+              <span className="rounded-full bg-dome-accent px-2 py-0.5 font-mono text-[11px] font-bold text-white">
                 {unreadCount}
               </span>
             )}
@@ -198,7 +204,7 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
         </button>
 
         {mobileOpen && (
-          <div className="flex max-h-[60vh] flex-col border-t border-dome-border">
+          <div className="flex max-h-[65vh] flex-col border-t border-dome-border">
             {messageList(mobileListRef)}
             {errorBanner}
             {inputArea}

@@ -150,8 +150,28 @@ export interface RestoredDashboard {
   classifications: ColumnClassification[]
   charts: ChartConfig[]
   governance: GovernanceEvent | null
+  data_url?: string  // signed Supabase Storage URL for raw CSV (present when data was saved)
 }
 
 export async function restoreDashboard(sessionId: string): Promise<RestoredDashboard> {
   return request<RestoredDashboard>('GET', `/dashboards/${sessionId}/restore`)
+}
+
+export async function uploadDashboardData(sessionId: string, csvString: string): Promise<void> {
+  const formData = new FormData()
+  formData.append('file', new Blob([csvString], { type: 'text/csv' }), 'data.csv')
+
+  const headers: Record<string, string> = { ...authHeaders() }
+  if (API_KEY) headers['X-API-Key'] = API_KEY
+  // Do NOT set Content-Type — browser sets multipart/form-data boundary automatically
+
+  const res = await fetch(`${API_BASE}/api/v1/dashboards/${sessionId}/data`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  })
+
+  if (!res.ok) {
+    throw new APIError(res.status, 'Failed to upload dashboard data')
+  }
 }
