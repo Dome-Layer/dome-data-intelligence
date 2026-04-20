@@ -49,6 +49,7 @@ class SaveDashboardRequest(BaseModel):
     column_count: int
     chart_count: int
     label: Optional[str] = None
+    data_context: Optional[str] = None
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -67,14 +68,14 @@ async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Reque
     try:
         snap = (
             db.table("sessions")
-            .select("column_summary,classifications,charts,governance")
+            .select("column_summary,classifications,charts")
             .eq("session_id", session_uuid)
             .execute()
         )
         if snap.data:
             session_snapshot = snap.data[0]
     except Exception:
-        pass  # best-effort; restore will fall back to sessions table
+        pass  # best-effort
 
     try:
         now = datetime.now(timezone.utc).isoformat()
@@ -87,6 +88,7 @@ async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Reque
             "label": body.label,
             "saved_at": now,
             "session_data": session_snapshot if session_snapshot else None,
+            "data_context": body.data_context,
         }
         db.table("saved_dashboards").insert(row).execute()
         return {"saved": True, "saved_at": now}
@@ -121,7 +123,7 @@ async def restore_dashboard(session_id: str, req: Request):
     # Fetch the saved record (confirms ownership and provides the snapshot)
     saved = (
         db.table("saved_dashboards")
-        .select("filename,session_data,data_file")
+        .select("filename,session_data,data_file,data_context")
         .eq("session_id", session_id)
         .eq("user_id", user_id)
         .execute()
@@ -130,36 +132,18 @@ async def restore_dashboard(session_id: str, req: Request):
         raise HTTPException(status_code=403, detail="Dashboard not found or access denied")
 
     row = saved.data[0]
-
-    # Build the response from the session_data snapshot or legacy sessions table
     sd = row.get("session_data")
-    if sd:
-        response = {
-            "filename": row["filename"],
-            "column_summary": sd.get("column_summary") or [],
-            "classifications": sd.get("classifications") or [],
-            "charts": sd.get("charts") or [],
-            "governance": sd.get("governance"),
-        }
-    else:
-        # Legacy path: older saves didn't store the snapshot → fall back to sessions table
-        session_uuid = verify_session_id(session_id)
-        result = (
-            db.table("sessions")
-            .select("filename,column_summary,classifications,charts,governance")
-            .eq("session_id", session_uuid)
-            .execute()
-        )
-        if not result.data:
-            raise HTTPException(status_code=404, detail="Session data not found")
-        legacy = result.data[0]
-        response = {
-            "filename": legacy["filename"],
-            "column_summary": legacy.get("column_summary") or [],
-            "classifications": legacy.get("classifications") or [],
-            "charts": legacy.get("charts") or [],
-            "governance": legacy.get("governance"),
-        }
+    if not sd:
+        raise HTTPException(status_code=404, detail="Dashboard data not found")
+
+    response: dict = {
+        "filename": row["filename"],
+        "column_summary": sd.get("column_summary") or [],
+        "classifications": sd.get("classifications") or [],
+        "charts": sd.get("charts") or [],
+        "governance": None,
+        "data_context": row.get("data_context"),
+    }
 
     # If raw data was uploaded to Storage, return a 1-hour signed URL
     data_file = row.get("data_file")

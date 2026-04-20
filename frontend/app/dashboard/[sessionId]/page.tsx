@@ -22,6 +22,7 @@ interface SessionData {
   columnSummary: ColumnSummary[]
   loadedSheets?: string[]
   skippedSheets?: string[]
+  restoredDataContext?: string  // pre-computed context used when rows are unavailable
 }
 
 
@@ -110,9 +111,17 @@ export default function DashboardPage() {
           filename: restored.filename,
           rows: restoredRows,
           columnSummary: restored.column_summary,
+          restoredDataContext: restoredRows.length === 0 ? (restored.data_context ?? undefined) : undefined,
         }
         setData(sessionData)
         if (restoredRows.length === 0) setRestoredView(true)
+        // Cache restored session so the same browser session skips the network round-trip
+        try {
+          const toCache = { ...sessionData, expiresAt: Date.now() + 30 * 60 * 1000 }
+          sessionStorage.setItem(`dome_session_${sessionId}`, JSON.stringify(toCache))
+        } catch {
+          // non-fatal — quota exceeded or private browsing
+        }
       })
       .catch(() => setNotFound(true))
   }, [sessionId, isAuthenticated])
@@ -142,10 +151,12 @@ export default function DashboardPage() {
     )
   }
 
-  const { dashboard, filename, rows, columnSummary, loadedSheets = [], skippedSheets = [] } = data
+  const { dashboard, filename, rows, columnSummary, loadedSheets = [], skippedSheets = [], restoredDataContext } = data
   const { classifications, charts } = dashboard
   const governance = (dashboard.governance as GovernanceEvent | null)
-  const dataContext = computeDataContext(rows, classifications)
+  const dataContext = rows.length > 0
+    ? computeDataContext(rows, classifications)
+    : (restoredDataContext ?? computeDataContext([], classifications))
 
   function rowsToCSV(dataRows: DataRow[]): string {
     if (dataRows.length === 0) return ''
@@ -174,11 +185,11 @@ export default function DashboardPage() {
         filename,
         column_count: classifications.length,
         chart_count: charts.length,
+        data_context: dataContext,
       })
-      // Upload raw rows to Supabase Storage — fire-and-forget, non-blocking
       if (rows.length > 0) {
         const csv = rowsToCSV(rows)
-        uploadDashboardData(sessionId, csv).catch(() => {})
+        await uploadDashboardData(sessionId, csv)
       }
       setSaveStatus('saved')
     } catch {

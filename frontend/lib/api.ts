@@ -135,7 +135,7 @@ export async function listSavedDashboards(): Promise<{ dashboards: SavedDashboar
 
 export async function saveDashboard(
   sessionId: string,
-  payload: { filename: string; column_count: number; chart_count: number; label?: string },
+  payload: { filename: string; column_count: number; chart_count: number; label?: string; data_context?: string },
 ): Promise<{ saved: boolean; saved_at: string }> {
   return request('POST', `/dashboards/${sessionId}/save`, payload)
 }
@@ -150,7 +150,8 @@ export interface RestoredDashboard {
   classifications: ColumnClassification[]
   charts: ChartConfig[]
   governance: GovernanceEvent | null
-  data_url?: string  // signed Supabase Storage URL for raw CSV (present when data was saved)
+  data_url?: string        // signed Supabase Storage URL for raw CSV (present when data was saved)
+  data_context?: string    // pre-computed aggregations for Q&A (fallback when CSV unavailable)
 }
 
 export async function restoreDashboard(sessionId: string): Promise<RestoredDashboard> {
