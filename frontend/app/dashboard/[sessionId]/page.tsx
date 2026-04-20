@@ -186,6 +186,9 @@ export default function DashboardPage() {
         column_count: classifications.length,
         chart_count: charts.length,
         data_context: dataContext,
+        column_summary: columnSummary,
+        classifications,
+        charts,
       })
       if (rows.length > 0) {
         const csv = rowsToCSV(rows)

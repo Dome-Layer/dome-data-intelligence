@@ -135,7 +135,16 @@ export async function listSavedDashboards(): Promise<{ dashboards: SavedDashboar
 
 export async function saveDashboard(
   sessionId: string,
-  payload: { filename: string; column_count: number; chart_count: number; label?: string; data_context?: string },
+  payload: {
+    filename: string
+    column_count: number
+    chart_count: number
+    label?: string
+    data_context?: string
+    column_summary?: ColumnSummary[]
+    classifications?: ColumnClassification[]
+    charts?: ChartConfig[]
+  },
 ): Promise<{ saved: boolean; saved_at: string }> {
   return request('POST', `/dashboards/${sessionId}/save`, payload)
 }

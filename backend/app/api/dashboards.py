@@ -50,6 +50,9 @@ class SaveDashboardRequest(BaseModel):
     chart_count: int
     label: Optional[str] = None
     data_context: Optional[str] = None
+    column_summary: Optional[list] = None
+    classifications: Optional[list] = None
+    charts: Optional[list] = None
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -59,23 +62,16 @@ async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Reque
     user_id = _require_user(req)
     db = _require_db()
 
-    # Verify and unwrap the HMAC-signed session token → raw UUID
-    session_uuid = verify_session_id(session_id)
+    # Validate the HMAC-signed session token (raises 400 if tampered)
+    verify_session_id(session_id)
 
-    # Snapshot the full session data into saved_dashboards so that restores
-    # never depend on the sessions table being present later.
-    session_snapshot: dict = {}
-    try:
-        snap = (
-            db.table("sessions")
-            .select("column_summary,classifications,charts")
-            .eq("session_id", session_uuid)
-            .execute()
-        )
-        if snap.data:
-            session_snapshot = snap.data[0]
-    except Exception:
-        pass  # best-effort
+    # Build the session snapshot from the frontend payload (the sessions table
+    # only stores column_summary; classifications and charts are never written back).
+    session_snapshot: dict = {
+        "column_summary": body.column_summary or [],
+        "classifications": body.classifications or [],
+        "charts": body.charts or [],
+    }
 
     try:
         now = datetime.now(timezone.utc).isoformat()
@@ -87,7 +83,7 @@ async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Reque
             "chart_count": body.chart_count,
             "label": body.label,
             "saved_at": now,
-            "session_data": session_snapshot if session_snapshot else None,
+            "session_data": session_snapshot,
             "data_context": body.data_context,
         }
         db.table("saved_dashboards").insert(row).execute()
