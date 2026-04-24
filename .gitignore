@@ -39,3 +39,4 @@ SESSION_LOG.md
 *.log
 .idea/
 .vscode/
+TOOL_CONTEXT.md
