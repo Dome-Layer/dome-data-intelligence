@@ -2,7 +2,7 @@
 
 *Upload any CSV or Excel file — get a governed analytics dashboard with natural language Q&A in seconds. Raw data never leaves your browser.*
 
-Part of the Dome portfolio. For full tool specification see [`TOOL_CONTEXT.md`](./TOOL_CONTEXT.md). For cross-cutting Dome context see [dome-docs](../dome-docs/).
+Part of the Dome portfolio. For architecture details see [backend/README.md](./backend/README.md) and [frontend/README.md](./frontend/README.md).
 
 ---
 
@@ -34,6 +34,15 @@ cp .env.example .env
 # Edit frontend/.env — set NEXT_PUBLIC_API_BASE=http://localhost:8000
 ```
 
+### Supabase (required for auth and saved dashboards)
+
+1. Create a Supabase project and note the project URL, service role key, and anon key.
+2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env`.
+3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `frontend/.env`.
+4. Run the SQL files in `supabase/migrations/` in the Supabase SQL Editor, in date order.
+
+Without Supabase, magic link auth and dashboard save/restore will not work.
+
 ### Run locally
 
 ```bash
@@ -63,7 +72,7 @@ Visit `http://localhost:3000`. Three preloaded demo datasets are available on th
 | `SUPABASE_URL` | Optional | Shared DOME Platform Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Optional | Supabase service role key |
 | `API_KEY` | Optional | Shared key required in `X-API-Key` header (leave empty to disable in dev) |
-| `SESSION_SIGNING_SECRET` | Optional | HMAC secret for session IDs — generate with `openssl rand -hex 32` |
+| `SESSION_SIGNING_SECRET` | **Required in production** | HMAC secret for session IDs — generate with `openssl rand -hex 32` |
 | `ALLOWED_ORIGINS` | Yes | CORS origins, comma-separated |
 | `ENVIRONMENT` | Yes | `development` / `production` |
 
@@ -90,10 +99,10 @@ Never commit real secrets. `.env` files are gitignored; `.env.example` files are
 - **Key gotcha:** Set `NEXT_PUBLIC_API_BASE` to `https://api.domelayer.com` with no `/api/v1` suffix. Railway injects `PORT` at runtime; the Dockerfile CMD uses `${PORT:-8000}`.
 
 ### Client Azure tenant
-`LLM_PROVIDER=azure_openai` — the `AzureOpenAIProvider` stub exists but is not yet implemented. See [`TOOL_CONTEXT.md`](./TOOL_CONTEXT.md) for details.
+`LLM_PROVIDER=azure_openai` — the `AzureOpenAIProvider` stub exists but is not yet implemented.
 
 ### Air-gapped
-`LLM_PROVIDER=ollama` — the `OllamaProvider` stub exists but is not yet implemented. See [`TOOL_CONTEXT.md`](./TOOL_CONTEXT.md) for details.
+`LLM_PROVIDER=ollama` — the `OllamaProvider` stub exists but is not yet implemented.
 
 ---
 
@@ -101,8 +110,9 @@ Never commit real secrets. `.env` files are gitignored; `.env.example` files are
 
 ```
 dome-data-intelligence/
-├── TOOL_CONTEXT.md              Full tool specification (read this first)
 ├── README.md                    This file
+├── LICENSE                      CC BY-NC 4.0
+├── SECURITY.md                  Vulnerability disclosure
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              FastAPI app entry point
@@ -121,13 +131,18 @@ dome-data-intelligence/
 │   ├── lib/                     api.ts, types.ts, fileParser.ts, dataContext.ts
 │   ├── public/demo/             Three preloaded demo CSV files
 │   └── .env.example
-└── docker-compose.yml
 ```
 
 ---
 
-## Related
+## Contact
 
-- [dome-docs](../dome-docs/) — cross-cutting Dome documentation
-- [`TOOL_CONTEXT.md`](./TOOL_CONTEXT.md) — full specification for this tool
-- [Portfolio status](../dome-docs/PORTFOLIO_STATUS.md)
+| Purpose | Address |
+|---|---|
+| General enquiries | hello@domelayer.com |
+| Privacy and data queries | privacy@domelayer.com |
+| Security vulnerabilities | security@domelayer.com (see [SECURITY.md](./SECURITY.md)) |
+
+## License
+
+[CC BY-NC 4.0](LICENSE) — free to view and fork for non-commercial use.

@@ -8,6 +8,9 @@ from pydantic import BaseModel
 
 from app.core.auth import verify_session_id
 from app.core.db import get_supabase_client
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -198,8 +201,8 @@ async def upload_dashboard_data(
         db.table("saved_dashboards").update({"data_file": storage_path}).eq(
             "session_id", session_id
         ).eq("user_id", user_id).execute()
-    except Exception:
-        pass  # best-effort
+    except Exception as exc:
+        logger.warning("data_file_path_update_failed", session_id=session_id, error=str(exc))
 
     return {"uploaded": True}
 

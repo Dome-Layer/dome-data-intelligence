@@ -14,6 +14,19 @@ settings = get_settings()
 configure_logging(settings.environment)
 
 # ---------------------------------------------------------------------------
+# Production safety check — fail loudly if insecure defaults are still set
+# ---------------------------------------------------------------------------
+_DEFAULT_SECRET = "change-me-in-production-use-32-random-chars"
+if settings.environment == "production" and settings.session_signing_secret == _DEFAULT_SECRET:
+    import logging as _logging
+    _logging.critical(
+        "SESSION_SIGNING_SECRET is still set to the default placeholder value. "
+        "Session tokens can be forged by anyone who has read this source code. "
+        "Set SESSION_SIGNING_SECRET to a random 32+ character string "
+        "(generate one with: openssl rand -hex 32) and redeploy immediately."
+    )
+
+# ---------------------------------------------------------------------------
 # Rate limiter (in-memory; use Redis for multi-process deployments)
 # ---------------------------------------------------------------------------
 limiter = Limiter(key_func=get_remote_address)
