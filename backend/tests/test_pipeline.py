@@ -194,6 +194,8 @@ def test_dashboard_governance_shape(mock_provider_factory, mock_db_factory):
     assert gov["input_type"] == "spreadsheet"
     assert isinstance(gov["rules_triggered"], list)
     assert "R-06" in gov["rules_triggered"]
+    assert "workflow_run_id" in gov
+    assert gov["workflow_run_id"] is None
 
 
 # ---------------------------------------------------------------------------
