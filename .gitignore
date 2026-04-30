@@ -1,7 +1,10 @@
-# Environment variables (sensitive)
+# ── Secrets — NEVER commit these ──────────────────────────────────────────────
 .env
 .env.*
 !.env.example
+!.env.*.example
+*.pem
+*.key
 
 # macOS
 .DS_Store
