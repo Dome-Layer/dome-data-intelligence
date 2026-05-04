@@ -8,9 +8,15 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.core.auth import sign_session_id
 from app.models.schemas import ColumnClassification, ColumnType
 
 client = TestClient(app)
+
+# Real HMAC-signed session tokens — exercise the same signing path as production
+# so a regression in sign_session_id / verify_session_id surfaces here.
+_TEST_SESSION_ID = sign_session_id("test-session-123")
+_GOV_TEST_SESSION_ID = sign_session_id("gov-test")
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -159,12 +165,12 @@ def test_dashboard_pipeline(mock_provider_factory, mock_db_factory):
     mock_provider_factory.return_value = mock_llm
 
     response = client.post("/api/v1/dashboard", json={
-        "session_id": "test-session-123",
+        "session_id": _TEST_SESSION_ID,
         "column_summary": SAMPLE_COLUMN_SUMMARY,
     })
     assert response.status_code == 200
     data = response.json()
-    assert data["session_id"] == "test-session-123"
+    assert data["session_id"] == _TEST_SESSION_ID
     assert len(data["classifications"]) == 3
     assert len(data["charts"]) > 0
     assert "governance" in data
@@ -185,7 +191,7 @@ def test_dashboard_governance_shape(mock_provider_factory, mock_db_factory):
     mock_provider_factory.return_value = mock_llm
 
     response = client.post("/api/v1/dashboard", json={
-        "session_id": "gov-test",
+        "session_id": _GOV_TEST_SESSION_ID,
         "column_summary": SAMPLE_COLUMN_SUMMARY,
     })
     gov = response.json()["governance"]
@@ -306,7 +312,7 @@ def test_qa_returns_200(mock_provider_factory, mock_db_factory):
     mock_provider_factory.return_value = mock_llm
 
     response = client.post("/api/v1/qa", json={
-        "session_id": "test-session-123",
+        "session_id": _TEST_SESSION_ID,
         "question": "Which month had the highest revenue?",
         "conversation_history": [],
     })
@@ -319,7 +325,7 @@ def test_qa_returns_200(mock_provider_factory, mock_db_factory):
 
 def test_qa_rejects_empty_question():
     response = client.post("/api/v1/qa", json={
-        "session_id": "test-session-123",
+        "session_id": _TEST_SESSION_ID,
         "question": "   ",
         "conversation_history": [],
     })
