@@ -1,4 +1,6 @@
 # Development and test dependencies — do NOT install in production images
 -r requirements.txt
+ruff==0.6.9
+mypy==1.11.2
 pytest~=8.2.0
 pytest-asyncio~=0.23.0

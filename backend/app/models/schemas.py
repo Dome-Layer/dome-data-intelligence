@@ -1,10 +1,11 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, Literal
 from enum import Enum
+from typing import Literal, Optional
 
+from pydantic import BaseModel
 
 # --- Enums ---
+
 
 class ColumnType(str, Enum):
     date = "date"
@@ -32,6 +33,7 @@ class HumanInLoop(str, Enum):
 
 # --- Column Summary (client → server) ---
 
+
 class ColumnSummary(BaseModel):
     name: str
     dtype: str
@@ -44,6 +46,7 @@ class ColumnSummary(BaseModel):
 
 
 # --- Upload ---
+
 
 class UploadRequest(BaseModel):
     filename: str
@@ -62,6 +65,7 @@ class UploadResponse(BaseModel):
 
 # --- Classification ---
 
+
 class ColumnClassification(BaseModel):
     column_name: str
     classified_type: ColumnType
@@ -75,6 +79,7 @@ class ColumnClassification(BaseModel):
 
 # --- Charts ---
 
+
 class ChartConfig(BaseModel):
     chart_id: str
     rule_id: str
@@ -87,6 +92,7 @@ class ChartConfig(BaseModel):
 
 
 # --- Governance ---
+
 
 class GovernanceEvent(BaseModel):
     agent_id: str
@@ -106,6 +112,7 @@ class GovernanceEvent(BaseModel):
 
 # --- Dashboard ---
 
+
 class DashboardRequest(BaseModel):
     session_id: str
     column_summary: list[ColumnSummary]
@@ -119,6 +126,7 @@ class DashboardResponse(BaseModel):
 
 
 # --- Q&A ---
+
 
 class ConversationTurn(BaseModel):
     role: Literal["user", "assistant"]
@@ -144,6 +152,7 @@ class QAResponse(BaseModel):
 
 
 # --- Shared ---
+
 
 class ErrorResponse(BaseModel):
     detail: str

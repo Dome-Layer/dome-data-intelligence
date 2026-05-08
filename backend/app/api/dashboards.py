@@ -47,6 +47,7 @@ def _require_db():
 
 # ─── Models ──────────────────────────────────────────────────────────────────
 
+
 class SaveDashboardRequest(BaseModel):
     filename: str
     column_count: int
@@ -59,6 +60,7 @@ class SaveDashboardRequest(BaseModel):
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
+
 
 @router.post("/dashboards/{session_id}/save")
 async def save_dashboard(session_id: str, body: SaveDashboardRequest, req: Request):
@@ -212,6 +214,8 @@ async def delete_dashboard(dashboard_id: str, req: Request):
     user_id = _require_user(req)
     db = _require_db()
     try:
-        db.table("saved_dashboards").delete().eq("id", dashboard_id).eq("user_id", user_id).execute()
+        db.table("saved_dashboards").delete().eq("id", dashboard_id).eq(
+            "user_id", user_id
+        ).execute()
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Failed to delete dashboard") from exc

@@ -50,15 +50,11 @@ def validate_column_summary(
             updates["sample_values"] = sanitized_samples
 
         if len(col.sample_values) > 10:
-            warnings.append(
-                f"Column '{col.name}': sample_values truncated to 10"
-            )
+            warnings.append(f"Column '{col.name}': sample_values truncated to 10")
             updates["sample_values"] = (updates.get("sample_values", sanitized_samples))[:10]
 
         if col.mean is not None and (col.min is None or col.max is None):
-            warnings.append(
-                f"Column '{col.name}': mean provided without min/max"
-            )
+            warnings.append(f"Column '{col.name}': mean provided without min/max")
 
         cleaned.append(col.model_copy(update=updates) if updates else col)
 

@@ -1,4 +1,4 @@
-from app.models.schemas import ColumnSummary, ColumnClassification
+from app.models.schemas import ColumnClassification, ColumnSummary
 from app.providers.base import LLMProvider
 
 

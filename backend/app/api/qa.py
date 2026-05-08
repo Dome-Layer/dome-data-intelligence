@@ -2,18 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.models.schemas import (
-    QARequest,
-    QAResponse,
-    HumanInLoop,
-    ColumnSummary,
-    ColumnClassification,
-)
-from app.services.governance import build_qa_governance, log_governance_event
-from app.core.config import get_llm_provider
 from app.core.auth import require_api_key, verify_session_id
+from app.core.config import get_llm_provider
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
+from app.models.schemas import (
+    ColumnClassification,
+    ColumnSummary,
+    HumanInLoop,
+    QARequest,
+    QAResponse,
+)
+from app.services.governance import build_qa_governance, log_governance_event
 
 router = APIRouter()
 logger = get_logger("api.qa")
@@ -23,14 +23,15 @@ _MAX_QUESTION_LEN = 2_000
 _MAX_DATA_CONTEXT_LEN = 32_000  # ~8k tokens; prevents runaway prompt size
 
 
-@router.post("/qa", response_model=QAResponse,
-             dependencies=[Depends(require_api_key)])
+@router.post("/qa", response_model=QAResponse, dependencies=[Depends(require_api_key)])
 @limiter.limit("10/minute")
 async def answer_question(request: Request, body: QARequest) -> QAResponse:
     if not body.question.strip():
         raise HTTPException(status_code=422, detail="Question must not be empty")
     if len(body.question) > _MAX_QUESTION_LEN:
-        raise HTTPException(status_code=422, detail=f"Question exceeds {_MAX_QUESTION_LEN} characters")
+        raise HTTPException(
+            status_code=422, detail=f"Question exceeds {_MAX_QUESTION_LEN} characters"
+        )
 
     # Verify the HMAC-signed session token
     session_uuid = verify_session_id(body.session_id)
@@ -54,9 +55,7 @@ async def answer_question(request: Request, body: QARequest) -> QAResponse:
                     raise HTTPException(status_code=404, detail="Session not found or expired")
                 session_data = result.data[0]
                 if session_data.get("column_summary"):
-                    column_summary = [
-                        ColumnSummary(**c) for c in session_data["column_summary"]
-                    ]
+                    column_summary = [ColumnSummary(**c) for c in session_data["column_summary"]]
                 if session_data.get("classifications"):
                     classifications = [
                         ColumnClassification(**c) for c in session_data["classifications"]
@@ -86,9 +85,7 @@ async def answer_question(request: Request, body: QARequest) -> QAResponse:
     answer = str(result_data.get("answer", ""))
     columns_referenced = list(result_data.get("columns_referenced", []))
     confidence = float(result_data.get("confidence", 0.8))
-    human_in_loop = (
-        HumanInLoop.recommended if confidence < 0.6 else HumanInLoop.not_required
-    )
+    human_in_loop = HumanInLoop.recommended if confidence < 0.6 else HumanInLoop.not_required
 
     governance = build_qa_governance(
         session_id=body.session_id,

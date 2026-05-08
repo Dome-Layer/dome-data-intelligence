@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.models.schemas import UploadRequest, UploadResponse
-from app.services.parser import validate_column_summary
-from app.core.config import get_settings
 from app.core.auth import require_api_key, sign_session_id
+from app.core.config import get_settings
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
+from app.models.schemas import UploadRequest, UploadResponse
+from app.services.parser import validate_column_summary
 
 router = APIRouter()
 logger = get_logger("api.upload")
@@ -38,8 +38,12 @@ async def get_optional_user_id(request: Request) -> Optional[str]:
         return None
 
 
-@router.post("/upload", response_model=UploadResponse, status_code=201,
-             dependencies=[Depends(require_api_key)])
+@router.post(
+    "/upload",
+    response_model=UploadResponse,
+    status_code=201,
+    dependencies=[Depends(require_api_key)],
+)
 @limiter.limit("30/minute")
 async def upload_summary(
     request: Request,

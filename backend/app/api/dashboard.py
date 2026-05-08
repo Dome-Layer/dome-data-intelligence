@@ -2,22 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.models.schemas import DashboardRequest, DashboardResponse
-from app.services.classifier import classify_columns
-from app.services.rules_engine import fire_rules
-from app.services.governance import build_dashboard_governance, log_governance_event
-from app.core.config import get_llm_provider
 from app.core.auth import require_api_key, verify_session_id
+from app.core.config import get_llm_provider
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
+from app.models.schemas import DashboardRequest, DashboardResponse
+from app.services.classifier import classify_columns
+from app.services.governance import build_dashboard_governance, log_governance_event
+from app.services.rules_engine import fire_rules
 
 router = APIRouter()
 logger = get_logger("api.dashboard")
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.post("/dashboard", response_model=DashboardResponse,
-             dependencies=[Depends(require_api_key)])
+@router.post(
+    "/dashboard", response_model=DashboardResponse, dependencies=[Depends(require_api_key)]
+)
 @limiter.limit("10/minute")
 async def generate_dashboard(request: Request, body: DashboardRequest) -> DashboardResponse:
     # Verify the HMAC-signed session token before doing any work
@@ -69,11 +70,13 @@ async def generate_dashboard(request: Request, body: DashboardRequest) -> Dashbo
     # Persist classifications and charts back to Supabase
     if db:
         try:
-            db.table("sessions").update({
-                "classifications": [c.model_dump() for c in classifications],
-                "charts": [c.model_dump() for c in charts],
-                "governance": governance.model_dump(mode="json"),
-            }).eq("session_id", session_uuid).execute()
+            db.table("sessions").update(
+                {
+                    "classifications": [c.model_dump() for c in classifications],
+                    "charts": [c.model_dump() for c in charts],
+                    "governance": governance.model_dump(mode="json"),
+                }
+            ).eq("session_id", session_uuid).execute()
         except Exception as exc:
             logger.warning("supabase_update_failed", error=str(exc))
 

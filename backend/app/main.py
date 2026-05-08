@@ -2,13 +2,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.api import auth as auth_router
+from app.api import dashboard, dashboards, qa, upload
 from app.core.config import get_settings
 from app.core.logging import configure_logging
-from app.api import upload, dashboard, qa, dashboards, auth as auth_router
 
 settings = get_settings()
 configure_logging(settings.environment)
@@ -19,6 +20,7 @@ configure_logging(settings.environment)
 _DEFAULT_SECRET = "change-me-in-production-use-32-random-chars"
 if settings.environment == "production" and settings.session_signing_secret == _DEFAULT_SECRET:
     import logging as _logging
+
     _logging.critical(
         "SESSION_SIGNING_SECRET is still set to the default placeholder value. "
         "Session tokens can be forged by anyone who has read this source code. "
@@ -46,6 +48,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Security headers middleware
 # ---------------------------------------------------------------------------
 
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -54,9 +57,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         if settings.environment == "production":
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=63072000; includeSubDomains"
-            )
+            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
         return response
 
 

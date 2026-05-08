@@ -1,5 +1,6 @@
 from functools import lru_cache
 from typing import Optional
+
 from pydantic_settings import BaseSettings
 
 
@@ -48,8 +49,8 @@ def get_settings() -> Settings:
 
 def get_llm_provider():
     """Factory: return the configured LLMProvider instance."""
-    from app.providers.claude import ClaudeProvider
     from app.providers.azure_openai import AzureOpenAIProvider
+    from app.providers.claude import ClaudeProvider
     from app.providers.ollama import OllamaProvider
 
     settings = get_settings()

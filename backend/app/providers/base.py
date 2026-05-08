@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from app.models.schemas import ColumnSummary, ColumnClassification, ConversationTurn
+
+from app.models.schemas import ColumnClassification, ColumnSummary, ConversationTurn
 
 
 class LLMProvider(ABC):

@@ -1,6 +1,6 @@
-from app.providers.base import LLMProvider
-from app.models.schemas import ColumnSummary, ColumnClassification, ConversationTurn
 from app.core.config import Settings
+from app.models.schemas import ColumnClassification, ColumnSummary, ConversationTurn
+from app.providers.base import LLMProvider
 
 
 class OllamaProvider(LLMProvider):
