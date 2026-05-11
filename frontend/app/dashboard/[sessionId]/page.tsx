@@ -11,7 +11,7 @@ import ColumnProfileTable from '@/components/dashboard/ColumnProfileTable'
 import QAPanel from '@/components/qa/QAPanel'
 import { computeDataContext } from '@/lib/dataContext'
 import { useAuth } from '@/context/AuthContext'
-import { getToken } from '@/lib/auth'
+import { getToken, getAuthSiteUrl } from '@/lib/auth'
 import Papa from 'papaparse'
 import { saveDashboard, restoreDashboard, uploadDashboardData } from '@/lib/api'
 
@@ -176,7 +176,7 @@ export default function DashboardPage() {
   async function handleSave() {
     if (!isAuthenticated) {
       const returnUrl = encodeURIComponent(window.location.href);
-      window.location.href = `https://domelayer.com/login?redirect=${returnUrl}`;
+      window.location.href = `${getAuthSiteUrl()}/login?redirect=${returnUrl}`;
       return
     }
     setSaveStatus('saving')

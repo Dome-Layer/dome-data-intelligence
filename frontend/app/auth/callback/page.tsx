@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getToken } from "@/lib/auth";
+import { getToken, getAuthSiteUrl } from "@/lib/auth";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function AuthCallbackPage() {
       router.replace("/");
     } else {
       // Cookie not found — send to central login
-      window.location.href = `https://domelayer.com/login?redirect=${encodeURIComponent(window.location.origin)}`;
+      window.location.href = `${getAuthSiteUrl()}/login?redirect=${encodeURIComponent(window.location.origin)}`;
     }
   }, [router]);
 
