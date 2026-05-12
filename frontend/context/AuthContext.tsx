@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { getToken, setToken, clearToken } from "@/lib/auth";
+import { deleteSession } from "@/lib/api";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -35,16 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    const token = getToken();
-    if (token) {
+    if (getToken()) {
       try {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_AUTH_BACKEND}/api/v1/auth/session`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await deleteSession();
       } catch {
         // best-effort
       }

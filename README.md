@@ -84,7 +84,6 @@ Visit `http://localhost:3000`. Three preloaded demo datasets are available on th
 | `NEXT_PUBLIC_API_KEY` | Optional | Matches backend `API_KEY` — leave empty for local dev |
 | `NEXT_PUBLIC_SUPABASE_URL` | Optional | Shared DOME Platform Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional | Supabase anon key |
-| `NEXT_PUBLIC_AUTH_BACKEND` | Optional | Shared auth backend URL for SSO cookie validation |
 | `NEXT_PUBLIC_SITE_URL` | Optional | Public URL of this app (used in auth redirects) |
 
 Never commit real secrets. `.env` files are gitignored; `.env.example` files are not.
