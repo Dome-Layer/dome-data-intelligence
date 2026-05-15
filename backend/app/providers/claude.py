@@ -11,8 +11,6 @@ from app.providers.base import LLMProvider
 
 logger = get_logger("providers.claude")
 
-MODEL = "claude-sonnet-4-6"
-
 # Retry config for 529 overloaded / 529 transient errors
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 2.0  # seconds; doubles each attempt
@@ -64,6 +62,7 @@ async def _with_retry(coro_fn, *args, **kwargs):
 class ClaudeProvider(LLMProvider):
     def __init__(self, settings: Settings) -> None:
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+        self._model = settings.llm_text_model
 
     async def classify_columns(
         self,
@@ -74,7 +73,7 @@ class ClaudeProvider(LLMProvider):
 
         response = await _with_retry(
             self.client.messages.create,
-            model=MODEL,
+            model=self._model,
             max_tokens=2048,
             system=CLASSIFIER_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_message}],
@@ -114,7 +113,7 @@ class ClaudeProvider(LLMProvider):
 
         response = await _with_retry(
             self.client.messages.create,
-            model=MODEL,
+            model=self._model,
             max_tokens=1024,
             system=system,
             messages=messages,
