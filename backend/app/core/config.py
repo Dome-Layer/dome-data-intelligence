@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     llm_provider: str = "claude"
+    llm_text_model: str = "claude-sonnet-4-6"
 
     # Claude
     anthropic_api_key: Optional[str] = None
