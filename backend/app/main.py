@@ -10,7 +10,9 @@ from app.api import auth as auth_router
 from app.api import dashboard, dashboards, qa, upload
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.core.sentry import init_sentry
 
+init_sentry()
 settings = get_settings()
 configure_logging(settings.environment)
 
