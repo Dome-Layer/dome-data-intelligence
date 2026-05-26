@@ -1,7 +1,8 @@
-import asyncio
 import json
 
 import anthropic
+from dome_core.json_utils import strip_json_fences
+from dome_core.llm.retry import with_retry
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -10,53 +11,6 @@ from app.models.schemas import ColumnClassification, ColumnSummary, Conversation
 from app.providers.base import LLMProvider
 
 logger = get_logger("providers.claude")
-
-# Retry config for 529 overloaded / 529 transient errors
-MAX_RETRIES = 3
-RETRY_BASE_DELAY = 2.0  # seconds; doubles each attempt
-
-
-def _strip_fences(text: str) -> str:
-    """Remove markdown code fences if present."""
-    text = text.strip()
-    if text.startswith("```"):
-        lines = text.splitlines()
-        lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        text = "\n".join(lines).strip()
-    return text
-
-
-def _is_retryable(exc: Exception) -> bool:
-    """Return True for transient Anthropic errors worth retrying."""
-    if isinstance(exc, anthropic.APIStatusError):
-        return exc.status_code in (529, 500, 502, 503, 504)
-    if isinstance(exc, (anthropic.APIConnectionError, anthropic.APITimeoutError)):
-        return True
-    return False
-
-
-async def _with_retry(coro_fn, *args, **kwargs):
-    """Call an async factory `coro_fn(*args, **kwargs)` with exponential backoff."""
-    last_exc: Exception | None = None
-    for attempt in range(MAX_RETRIES):
-        try:
-            return await coro_fn(*args, **kwargs)
-        except Exception as exc:
-            if not _is_retryable(exc):
-                raise
-            last_exc = exc
-            delay = RETRY_BASE_DELAY * (2**attempt)
-            logger.warning(
-                "claude_retrying",
-                attempt=attempt + 1,
-                max_retries=MAX_RETRIES,
-                delay=delay,
-                error=str(exc),
-            )
-            await asyncio.sleep(delay)
-    raise last_exc  # type: ignore[misc]
 
 
 class ClaudeProvider(LLMProvider):
@@ -71,7 +25,7 @@ class ClaudeProvider(LLMProvider):
         col_data = [col.model_dump() for col in column_summary]
         user_message = f"Classify these columns:\n\n{json.dumps(col_data, indent=2)}"
 
-        response = await _with_retry(
+        response = await with_retry(
             self.client.messages.create,
             model=self._model,
             max_tokens=2048,
@@ -79,7 +33,7 @@ class ClaudeProvider(LLMProvider):
             messages=[{"role": "user", "content": user_message}],
         )
 
-        raw = _strip_fences(response.content[0].text)
+        raw = strip_json_fences(response.content[0].text)
         data = json.loads(raw)
         return [ColumnClassification(**item) for item in data]
 
@@ -111,7 +65,7 @@ class ClaudeProvider(LLMProvider):
         messages = [{"role": turn.role, "content": turn.content} for turn in conversation_history]
         messages.append({"role": "user", "content": question})
 
-        response = await _with_retry(
+        response = await with_retry(
             self.client.messages.create,
             model=self._model,
             max_tokens=1024,
@@ -119,7 +73,7 @@ class ClaudeProvider(LLMProvider):
             messages=messages,
         )
 
-        raw = _strip_fences(response.content[0].text)
+        raw = strip_json_fences(response.content[0].text)
 
         try:
             result = json.loads(raw)

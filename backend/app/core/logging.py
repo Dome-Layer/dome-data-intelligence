@@ -1,31 +1,9 @@
-import logging
-
-import structlog
+from dome_core.logging import configure_logging as _configure_logging
+from dome_core.logging import get_logger
 
 
 def configure_logging(environment: str = "development") -> None:
-    log_level = logging.DEBUG if environment == "development" else logging.INFO
-
-    shared_processors = [
-        structlog.contextvars.merge_contextvars,
-        structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-    ]
-
-    if environment == "production":
-        renderer = structlog.processors.JSONRenderer()
-    else:
-        renderer = structlog.dev.ConsoleRenderer()
-
-    structlog.configure(
-        processors=shared_processors + [renderer],
-        wrapper_class=structlog.make_filtering_bound_logger(log_level),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
-    )
+    _configure_logging(environment=environment)
 
 
-def get_logger(name: str = "dome") -> structlog.BoundLogger:
-    return structlog.get_logger(name)
+__all__ = ["configure_logging", "get_logger"]

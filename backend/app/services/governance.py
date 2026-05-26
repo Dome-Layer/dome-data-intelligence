@@ -1,13 +1,12 @@
-import hashlib
-import json
 from datetime import datetime, timezone
 from typing import Optional
+
+from dome_core.governance import GovernanceEvent, hash_input_dict
 
 from app.core.logging import get_logger
 from app.models.schemas import (
     ChartConfig,
     ColumnClassification,
-    GovernanceEvent,
     HumanInLoop,
 )
 
@@ -15,12 +14,6 @@ logger = get_logger("governance")
 
 AGENT_ID = "data-intelligence"
 ALL_RULES = ["R-01", "R-02", "R-03", "R-04", "R-05", "R-06", "R-07"]
-
-
-def _hash_input(data: dict) -> str:
-    raw = json.dumps(data, sort_keys=True, default=str)
-    digest = hashlib.sha256(raw.encode()).hexdigest()[:16]
-    return f"sha256:{digest}"
 
 
 def _classification_confidence(classifications: list[ColumnClassification]) -> float:
@@ -43,7 +36,7 @@ def build_dashboard_governance(
     col_count = len(classifications)
     chart_count = len(charts)
     confidence = _classification_confidence(classifications)
-    input_hash = _hash_input(
+    input_hash = hash_input_dict(
         {
             "session_id": session_id,
             "classifications": [c.model_dump() for c in classifications],
@@ -63,7 +56,7 @@ def build_dashboard_governance(
         rules_applied=ALL_RULES,
         rules_triggered=rules_triggered,
         confidence=confidence,
-        human_in_loop=HumanInLoop.not_required,
+        human_in_loop=HumanInLoop.not_required.value,
         user_id=user_id,
         metadata={
             "column_count": col_count,
@@ -82,7 +75,7 @@ def build_qa_governance(
     confidence: float,
     user_id: Optional[str] = None,
 ) -> GovernanceEvent:
-    input_hash = _hash_input({"session_id": session_id, "question": question})
+    input_hash = hash_input_dict({"session_id": session_id, "question": question})
 
     return GovernanceEvent(
         agent_id=AGENT_ID,
@@ -94,7 +87,9 @@ def build_qa_governance(
         rules_applied=[],
         rules_triggered=[],
         confidence=confidence,
-        human_in_loop=(HumanInLoop.recommended if confidence < 0.6 else HumanInLoop.not_required),
+        human_in_loop=HumanInLoop.recommended.value
+        if confidence < 0.6
+        else HumanInLoop.not_required.value,
         user_id=user_id,
         metadata={
             "question_length": len(question),
@@ -115,6 +110,6 @@ def log_governance_event(event: GovernanceEvent) -> None:
         output_summary=event.output_summary,
         rules_triggered=event.rules_triggered,
         confidence=event.confidence,
-        human_in_loop=event.human_in_loop.value,
+        human_in_loop=event.human_in_loop,
         metadata=event.metadata,
     )
