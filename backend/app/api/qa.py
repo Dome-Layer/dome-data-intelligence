@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+from dome_core.sanitize import sanitize_user_text
+
 from app.core.auth import require_api_key, verify_session_id
 from app.core.config import get_llm_provider
 from app.core.db import get_supabase_client
@@ -72,7 +74,7 @@ async def answer_question(request: Request, body: QARequest) -> QAResponse:
     try:
         provider = get_llm_provider()
         result_data = await provider.answer_question(
-            question=body.question,
+            question=sanitize_user_text(body.question),
             column_summary=column_summary,
             classifications=classifications,
             conversation_history=body.conversation_history,
