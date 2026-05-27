@@ -1,8 +1,7 @@
+from dome_core.sanitize import sanitize_user_text
 from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-
-from dome_core.sanitize import sanitize_user_text
 
 from app.core.auth import require_api_key, verify_session_id
 from app.core.config import get_llm_provider
