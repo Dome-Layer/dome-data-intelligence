@@ -1,8 +1,10 @@
-from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
 
+from dome_core.governance import GovernanceEvent
 from pydantic import BaseModel
+
+__all__ = ["GovernanceEvent"]
 
 # --- Enums ---
 
@@ -89,25 +91,6 @@ class ChartConfig(BaseModel):
     y_column: Optional[str] = None
     color_column: Optional[str] = None
     secondary_y_column: Optional[str] = None
-
-
-# --- Governance ---
-
-
-class GovernanceEvent(BaseModel):
-    agent_id: str
-    action_type: str
-    timestamp: datetime
-    input_hash: str
-    input_type: str
-    output_summary: str
-    rules_applied: list[str]
-    rules_triggered: list[str]
-    confidence: Optional[float] = None
-    human_in_loop: HumanInLoop
-    user_id: Optional[str] = None
-    workflow_run_id: Optional[str] = None
-    metadata: dict
 
 
 # --- Dashboard ---

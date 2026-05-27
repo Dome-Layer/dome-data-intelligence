@@ -1,3 +1,4 @@
+from dome_core.middleware import SecurityHeadersMiddleware
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -47,23 +48,6 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ---------------------------------------------------------------------------
-# Security headers middleware
-# ---------------------------------------------------------------------------
-
-
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-        if settings.environment == "production":
-            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
-        return response
-
-
-# ---------------------------------------------------------------------------
 # Request body size limit middleware (1 MB)
 # ---------------------------------------------------------------------------
 _MAX_BODY_BYTES = 1_048_576  # 1 MB
@@ -84,7 +68,7 @@ class LimitBodySizeMiddleware(BaseHTTPMiddleware):
 # Middleware is applied last-registered-first, so order matters:
 # SecurityHeaders → LimitBodySize → CORS → route handler
 
-app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 app.add_middleware(LimitBodySizeMiddleware)
 
 app.add_middleware(

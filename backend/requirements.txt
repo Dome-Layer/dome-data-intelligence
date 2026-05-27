@@ -3,7 +3,9 @@
 annotated-types==0.7.0
     # via pydantic
 anthropic==0.40.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   dome-core
 anyio==4.13.0
     # via
     #   anthropic
@@ -23,9 +25,12 @@ deprecation==2.1.0
     # via postgrest
 distro==1.9.0
     # via anthropic
+dome-core @ git+https://github.com/Dome-Layer/dome-core.git@7da8133816cfeca5bf36a7c61abc7e6729576495
+    # via -r requirements.in
 fastapi==0.115.14
     # via
     #   -r requirements.in
+    #   dome-core
     #   sentry-sdk
 gotrue==2.12.4
     # via supabase
@@ -70,6 +75,7 @@ pydantic==2.7.4
     # via
     #   -r requirements.in
     #   anthropic
+    #   dome-core
     #   fastapi
     #   gotrue
     #   postgrest
@@ -96,7 +102,9 @@ pyyaml==6.0.3
 realtime==1.0.6
     # via supabase
 sentry-sdk==2.60.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   dome-core
 six==1.17.0
     # via python-dateutil
 slowapi==0.1.9
@@ -112,9 +120,13 @@ storage3==0.7.7
 strenum==0.4.15
     # via postgrest
 structlog==24.2.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   dome-core
 supabase==2.5.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   dome-core
 supafunc==0.4.7
     # via supabase
 typing-extensions==4.15.0
