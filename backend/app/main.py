@@ -1,4 +1,4 @@
-from dome_core.middleware import SecurityHeadersMiddleware
+from dome_core.middleware import RequestIDMiddleware, SecurityHeadersMiddleware
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -78,6 +78,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-API-Key", "Authorization"],
 )
+app.add_middleware(RequestIDMiddleware)
 
 app.include_router(upload.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
