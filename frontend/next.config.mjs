@@ -11,25 +11,8 @@ const securityHeaders = [
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   // Restrict browser feature access
   { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' },
-  // Content Security Policy
-  // Note: 'unsafe-inline' for scripts is required by Next.js internals;
-  // 'unsafe-eval' is needed in dev mode only but kept for consistency.
-  // Tighten with nonces if stricter CSP is required.
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
-      "font-src 'self'",
-      "connect-src 'self' http://localhost:8000 https:",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-    ].join('; '),
-  },
+  // Content-Security-Policy is set per-request in middleware.ts (nonce-based
+  // script-src — no 'unsafe-inline'/'unsafe-eval').
 ]
 
 const nextConfig = {

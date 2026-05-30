@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { AuthProvider } from '@/context/AuthContext'
+import { StagingBanner } from '@dome-layer/dome-ui'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -52,13 +54,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const nonce = headers().get('x-nonce') ?? undefined
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen bg-dome-bg text-dome-text font-sans antialiased flex flex-col">
+        <StagingBanner environment={process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT} />
         <AuthProvider>
           <Header />
           {children}
