@@ -1,66 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { DomeLogo } from "./DomeLogo";
-import { ThemeToggle } from "./ThemeToggle";
-import { useAuth } from "@/context/AuthContext";
-import { getAuthSiteUrl } from "@/lib/auth";
+import { ToolHeader } from "@dome-layer/dome-ui";
 
 export function Header() {
-  const { isAuthenticated, signOut } = useAuth();
-
   return (
-    <header className="site-header sticky top-0 z-40 px-6 md:px-8">
-      <div className="h-16 flex items-center justify-between">
-        <Link href="/" aria-label="Home">
-          <DomeLogo width={100} />
+    <ToolHeader
+      toolName="Data Intelligence"
+      navLinks={[{ label: "Saved", href: "/saved" }]}
+      renderLink={({ href, children, ...rest }) => (
+        <Link href={href} {...rest}>
+          {children}
         </Link>
-
-        <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <Link
-            href="/saved"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-body-sm)",
-              fontWeight: 500,
-              lineHeight: "1.25rem",
-              color: "var(--color-text-secondary)",
-              textDecoration: "none",
-              transition: "color 150ms ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-secondary)")}
-          >
-            Saved
-          </Link>
-
-          {isAuthenticated ? (
-            <button
-              onClick={async () => {
-                await signOut();
-                window.location.href = `${getAuthSiteUrl()}/login`;
-              }}
-              className="btn btn-neutral"
-              style={{ padding: "12px 24px", fontSize: "var(--text-body-sm)" }}
-            >
-              Sign out
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                const returnUrl = encodeURIComponent(window.location.href);
-                window.location.href = `${getAuthSiteUrl()}/login?redirect=${returnUrl}`;
-              }}
-              className="btn btn-primary"
-              style={{ padding: "12px 24px", fontSize: "var(--text-body-sm)" }}
-            >
-              Sign in
-            </button>
-          )}
-
-          <ThemeToggle />
-        </nav>
-      </div>
-    </header>
+      )}
+    />
   );
 }

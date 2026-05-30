@@ -29,7 +29,7 @@ distlib==0.4.0
     # via virtualenv
 distro==1.9.0
     # via anthropic
-dome-core @ git+https://github.com/Dome-Layer/dome-core.git@2405a68d2a52913bcd175972dc2ad603be62a8be
+dome-core @ git+https://github.com/Dome-Layer/dome-core.git@2325fe489348a13624e0c8b2bf10a344add3dbce
     # via -r requirements.in
 fastapi==0.115.14
     # via
