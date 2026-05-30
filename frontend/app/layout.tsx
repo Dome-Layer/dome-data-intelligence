@@ -5,6 +5,7 @@ import '@/styles/globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { AuthProvider } from '@/context/AuthContext'
+import { StagingBanner } from '@dome-layer/dome-ui'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,6 +62,7 @@ export default function RootLayout({
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen bg-dome-bg text-dome-text font-sans antialiased flex flex-col">
+        <StagingBanner environment={process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT} />
         <AuthProvider>
           <Header />
           {children}
