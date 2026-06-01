@@ -3,6 +3,7 @@ from typing import Optional
 
 from dome_core.governance import GovernanceEvent, hash_input_dict
 
+from app.core.db import get_supabase_client
 from app.core.logging import get_logger
 from app.models.schemas import (
     ChartConfig,
@@ -113,3 +114,29 @@ def log_governance_event(event: GovernanceEvent) -> None:
         human_in_loop=event.human_in_loop,
         metadata=event.metadata,
     )
+
+    # Persist to the shared governance_events audit table (best-effort: a
+    # persistence failure must never break the main dashboard/Q&A flow). DA-003.
+    try:
+        db = get_supabase_client()
+        if db is None:
+            return
+        db.table("governance_events").insert(
+            {
+                "agent_id": event.agent_id,
+                "action_type": event.action_type,
+                "timestamp": event.timestamp.isoformat(),
+                "input_hash": event.input_hash,
+                "input_type": event.input_type,
+                "output_summary": event.output_summary,
+                "rules_applied": event.rules_applied,
+                "rules_triggered": event.rules_triggered,
+                "confidence": event.confidence,
+                "human_in_loop": event.human_in_loop,
+                "user_id": event.user_id,
+                "workflow_run_id": event.workflow_run_id,
+                "metadata": event.metadata,
+            }
+        ).execute()
+    except Exception as e:
+        logger.error("governance_event_failed", error=str(e))
