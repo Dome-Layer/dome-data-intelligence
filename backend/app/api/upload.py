@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.core.auth import require_api_key, sign_session_id
+from app.core.auth import require_api_key, sign_session_id, verify_bearer_optional
 from app.core.config import get_settings
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
@@ -23,19 +23,9 @@ async def get_optional_user_id(request: Request) -> Optional[str]:
     Used to link anonymous Data Intelligence sessions to an authenticated
     DOME Platform user when the dome_auth_token SSO cookie is forwarded by
     the frontend. Falls back to None (anonymous session) if no valid token.
+    The token is verified locally via dome-core (verify_bearer_optional).
     """
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return None
-    token = auth.removeprefix("Bearer ").strip()
-    db = get_supabase_client()
-    if db is None:
-        return None
-    try:
-        resp = db.auth.get_user(token)
-        return str(resp.user.id) if resp and resp.user else None
-    except Exception:
-        return None
+    return verify_bearer_optional(request)
 
 
 @router.post(

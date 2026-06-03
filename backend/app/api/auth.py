@@ -17,8 +17,8 @@ async def delete_session(req: Request):
         return
     token = auth.removeprefix("Bearer ").strip()
     try:
-        resp = db.auth.get_user(token)
-        if resp and resp.user:
-            db.auth.admin.sign_out(token)
+        # admin.sign_out validates the token itself; no separate get_user
+        # round-trip needed (DA-005).
+        db.auth.admin.sign_out(token)
     except Exception:
         pass  # best-effort
