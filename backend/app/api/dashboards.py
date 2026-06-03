@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
-from app.core.auth import verify_session_id
+from app.core.auth import verify_bearer_optional, verify_session_id
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
 
@@ -16,19 +16,9 @@ router = APIRouter()
 
 
 def _extract_user_id(req: Request) -> Optional[str]:
-    """Extract authenticated user_id from the Bearer token via Supabase."""
-    db = get_supabase_client()
-    if db is None:
-        return None
-    auth = req.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return None
-    token = auth.removeprefix("Bearer ").strip()
-    try:
-        resp = db.auth.get_user(token)
-        return str(resp.user.id) if resp and resp.user else None
-    except Exception:
-        return None
+    """Extract authenticated user_id from the Bearer token (verified locally
+    via dome-core), or None when the header is absent or the token is invalid."""
+    return verify_bearer_optional(req)
 
 
 def _require_user(req: Request) -> str:
