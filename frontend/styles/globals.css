@@ -1,4 +1,5 @@
 @import "@dome-layer/dome-ui/tokens.css";
+@import "@dome-layer/dome-ui/components.css";
 
 @tailwind base;
 @tailwind components;
