@@ -4,7 +4,7 @@ annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
     # via pydantic
-anthropic==0.40.0
+anthropic==0.109.1
     # via
     #   -r requirements.in
     #   dome-core
@@ -30,10 +30,14 @@ cryptography==48.0.0
 deprecated==1.3.1
     # via limits
 deprecation==2.1.0
-    # via postgrest
+    # via
+    #   postgrest
+    #   storage3
 distlib==0.4.1
     # via virtualenv
 distro==1.9.0
+    # via anthropic
+docstring-parser==0.18.0
     # via anthropic
 dome-core @ git+https://github.com/Dome-Layer/dome-core.git@b65bcf0548b102c69b5ae45014cb51f09ad99f56
     # via -r requirements.in
@@ -46,8 +50,6 @@ filelock==3.29.0
     # via
     #   python-discovery
     #   virtualenv
-gotrue==2.12.4
-    # via supabase
 h11==0.16.0
     # via
     #   httpcore
@@ -64,11 +66,11 @@ httpx==0.27.2
     # via
     #   -r requirements.in
     #   anthropic
-    #   gotrue
     #   postgrest
     #   storage3
     #   supabase
-    #   supafunc
+    #   supabase-auth
+    #   supabase-functions
 hyperframe==6.1.0
     # via h2
 identify==2.6.19
@@ -77,13 +79,18 @@ idna==3.18
     # via
     #   anyio
     #   httpx
+    #   yarl
 iniconfig==2.3.0
     # via pytest
 jiter==0.15.0
     # via anthropic
+librt==0.11.0
+    # via mypy
 limits==5.8.0
     # via slowapi
-mypy==1.11.2
+multidict==6.7.1
+    # via yarl
+mypy==1.20.2
     # via -r requirements-dev.in
 mypy-extensions==1.1.0
     # via mypy
@@ -94,16 +101,20 @@ packaging==26.2
     #   deprecation
     #   limits
     #   pytest
+pathspec==1.1.1
+    # via mypy
 platformdirs==4.10.0
     # via
     #   python-discovery
     #   virtualenv
 pluggy==1.6.0
     # via pytest
-postgrest==0.16.11
+postgrest==2.31.0
     # via supabase
 pre-commit==4.6.0
     # via -r requirements-dev.in
+propcache==0.5.2
+    # via yarl
 pycparser==3.0
     # via cffi
 pydantic==2.13.4
@@ -112,9 +123,11 @@ pydantic==2.13.4
     #   anthropic
     #   dome-core
     #   fastapi
-    #   gotrue
     #   postgrest
     #   pydantic-settings
+    #   realtime
+    #   storage3
+    #   supabase-auth
 pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.14.1
@@ -122,17 +135,13 @@ pydantic-settings==2.14.1
 pyjwt==2.13.0
     # via
     #   dome-core
-    #   gotrue
+    #   supabase-auth
 pytest==8.2.2
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
-pytest-asyncio==0.23.8
+pytest-asyncio==0.26.0
     # via -r requirements-dev.in
-python-dateutil==2.9.0.post0
-    # via
-    #   realtime
-    #   storage3
 python-discovery==1.4.0
     # via virtualenv
 python-dotenv==1.2.2
@@ -140,22 +149,20 @@ python-dotenv==1.2.2
     #   -r requirements.in
     #   pydantic-settings
     #   uvicorn
-python-multipart==0.0.30
+python-multipart==0.0.32
     # via -r requirements.in
 pyyaml==6.0.3
     # via
     #   pre-commit
     #   uvicorn
-realtime==1.0.6
+realtime==2.31.0
     # via supabase
-ruff==0.6.9
+ruff==0.15.16
     # via -r requirements-dev.in
-sentry-sdk==2.61.1
+sentry-sdk==2.62.0
     # via
     #   -r requirements.in
     #   dome-core
-six==1.17.0
-    # via python-dateutil
 slowapi==0.1.9
     # via -r requirements.in
 sniffio==1.3.1
@@ -164,19 +171,21 @@ sniffio==1.3.1
     #   httpx
 starlette==1.2.1
     # via fastapi
-storage3==0.7.7
+storage3==2.31.0
     # via supabase
 strenum==0.4.15
-    # via postgrest
+    # via supabase-functions
 structlog==24.2.0
     # via
     #   -r requirements.in
     #   dome-core
-supabase==2.5.3
+supabase==2.31.0
     # via
     #   -r requirements.in
     #   dome-core
-supafunc==0.4.7
+supabase-auth==2.31.0
+    # via supabase
+supabase-functions==2.31.0
     # via supabase
 typing-extensions==4.15.0
     # via
@@ -189,7 +198,6 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   realtime
     #   starlette
-    #   storage3
     #   typing-inspection
 typing-inspection==0.4.2
     # via
@@ -198,7 +206,7 @@ typing-inspection==0.4.2
     #   pydantic-settings
 urllib3==2.7.0
     # via sentry-sdk
-uvicorn==0.30.6
+uvicorn==0.49.0
     # via -r requirements.in
 uvloop==0.22.1
     # via uvicorn
@@ -206,9 +214,15 @@ virtualenv==21.4.2
     # via pre-commit
 watchfiles==1.2.0
     # via uvicorn
-websockets==12.0
+websockets==15.0.1
     # via
     #   realtime
     #   uvicorn
 wrapt==2.2.1
     # via deprecated
+yarl==1.24.2
+    # via
+    #   postgrest
+    #   storage3
+    #   supabase
+    #   supabase-functions
