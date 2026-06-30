@@ -74,7 +74,6 @@ async def generate_dashboard(request: Request, body: DashboardRequest) -> Dashbo
                 {
                     "classifications": [c.model_dump() for c in classifications],
                     "charts": [c.model_dump() for c in charts],
-                    "governance": governance.model_dump(mode="json"),
                 }
             ).eq("session_id", session_uuid).execute()
         except Exception as exc:
