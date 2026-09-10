@@ -44,3 +44,6 @@ SESSION_LOG.md
 .idea/
 .vscode/
 TOOL_CONTEXT.md
+
+# Claude Code IDE configs — contain absolute local paths, not for public repos
+.claude/
