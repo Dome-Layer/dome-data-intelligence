@@ -47,3 +47,6 @@ TOOL_CONTEXT.md
 
 # Claude Code IDE configs, contain absolute local paths, not for public repos
 .claude/
+
+# Wrangler local dev state (wrangler dev)
+.wrangler/
