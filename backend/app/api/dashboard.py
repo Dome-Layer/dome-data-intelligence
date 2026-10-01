@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.core.auth import require_api_key, verify_session_id
+from app.core.auth import require_api_key, verify_bearer_optional, verify_session_id
 from app.core.config import get_llm_provider
 from app.core.db import get_supabase_client
 from app.core.logging import get_logger
@@ -64,6 +64,9 @@ async def generate_dashboard(request: Request, body: DashboardRequest) -> Dashbo
         charts=charts,
         row_count=row_count,
         filename=filename,
+        # Anonymous use is allowed; a signed-in caller is recorded so the audit
+        # trail can answer "who ran this" (Sprint C item 4).
+        user_id=verify_bearer_optional(request),
     )
     log_governance_event(governance)
 

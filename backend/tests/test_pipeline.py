@@ -226,6 +226,78 @@ def test_dashboard_governance_shape(mock_provider_factory, mock_db_factory):
     assert gov["workflow_run_id"] is None
 
 
+_TEST_USER_ID = "6f1d2c3b-0000-4000-8000-000000000001"
+
+
+@patch("app.api.dashboard.verify_bearer_optional", return_value=_TEST_USER_ID)
+@patch("app.api.dashboard.get_supabase_client")
+@patch("app.api.dashboard.get_llm_provider")
+def test_dashboard_governance_records_signed_in_user(
+    mock_provider_factory, mock_db_factory, _mock_verify
+):
+    """A signed-in run must carry user_id into governance_events (Sprint C item 4):
+    until 2026-10-01 every Data Intelligence event was written without one."""
+    mock_db = MagicMock()
+    mock_db.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+        {"filename": "q3.xlsx", "row_count": 12}
+    ]
+    mock_db_factory.return_value = mock_db
+    mock_llm = MagicMock()
+    mock_llm.classify_columns = AsyncMock(return_value=MOCK_CLASSIFICATIONS)
+    mock_provider_factory.return_value = mock_llm
+
+    with patch("app.services.governance.get_supabase_client", return_value=mock_db):
+        response = client.post(
+            "/api/v1/dashboard",
+            json={"session_id": _TEST_SESSION_ID, "column_summary": SAMPLE_COLUMN_SUMMARY},
+            headers={"Authorization": "Bearer signed-in"},
+        )
+    assert response.status_code == 200
+    assert response.json()["governance"]["user_id"] == _TEST_USER_ID
+    inserted = [
+        c.args[0]
+        for c in mock_db.table.return_value.insert.call_args_list
+        if c.args and c.args[0].get("agent_id") == "data-intelligence"
+    ]
+    assert inserted and inserted[0]["user_id"] == _TEST_USER_ID
+
+
+@patch("app.api.qa.verify_bearer_optional", return_value=_TEST_USER_ID)
+@patch("app.api.qa.get_supabase_client")
+@patch("app.api.qa.get_llm_provider")
+def test_qa_governance_records_signed_in_user(mock_provider_factory, mock_db_factory, _mock_verify):
+    mock_db_factory.return_value = None
+    mock_llm = MagicMock()
+    mock_llm.answer_question = AsyncMock(
+        return_value={"answer": "March.", "columns_referenced": ["Date"], "confidence": 0.9}
+    )
+    mock_provider_factory.return_value = mock_llm
+
+    response = client.post(
+        "/api/v1/qa",
+        json={
+            "session_id": _TEST_SESSION_ID,
+            "question": "Which month peaked?",
+            "conversation_history": [],
+            "column_summary": SAMPLE_COLUMN_SUMMARY,
+            "classifications": [c.model_dump() for c in MOCK_CLASSIFICATIONS],
+        },
+        headers={"Authorization": "Bearer signed-in"},
+    )
+    assert response.status_code == 200
+    assert response.json()["governance"]["user_id"] == _TEST_USER_ID
+
+
+def test_no_bearer_means_no_user():
+    """No Authorization header: the run is recorded without a user (anonymous use stays allowed)."""
+    from starlette.requests import Request
+
+    from app.core.auth import verify_bearer_optional
+
+    scope = {"type": "http", "headers": [], "method": "POST", "path": "/"}
+    assert verify_bearer_optional(Request(scope)) is None
+
+
 # ---------------------------------------------------------------------------
 # Rules engine (unit tests — no HTTP)
 # ---------------------------------------------------------------------------
