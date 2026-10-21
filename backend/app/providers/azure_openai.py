@@ -4,7 +4,7 @@ from app.providers.base import LLMProvider
 
 
 class AzureOpenAIProvider(LLMProvider):
-    """Azure OpenAI provider stub — not yet implemented."""
+    """Azure OpenAI provider stub, not yet implemented."""
 
     def __init__(self, settings: Settings) -> None:
         self.endpoint = settings.azure_openai_endpoint
