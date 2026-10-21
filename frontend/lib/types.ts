@@ -4,7 +4,7 @@ export type ChartType = 'line' | 'bar' | 'kpi' | 'histogram' | 'donut' | 'summar
 export type HumanInLoop = 'not_required' | 'recommended' | 'required' | 'completed'
 export type ConversationRole = 'user' | 'assistant'
 
-// Column summary — produced by fileParser.ts, sent to /upload
+// Column summary: produced by fileParser.ts, sent to /upload
 export interface ColumnSummary {
   name: string
   dtype: string
@@ -108,7 +108,7 @@ export interface QAResponse {
   governance: GovernanceEvent
 }
 
-// Client-side only — never sent to backend
+// Client-side only, never sent to the backend
 export type DataRow = Record<string, string | number | null>
 
 export interface ParsedFile {

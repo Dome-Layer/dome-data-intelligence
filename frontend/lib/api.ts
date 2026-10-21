@@ -59,7 +59,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
         const json = await res.json()
         detail = json.detail ?? detail
       } catch {
-        // ignore parse errors — use statusText
+        // ignore parse errors, use statusText
       }
       throw new APIError(res.status, detail)
     }
@@ -67,7 +67,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     return res.json() as Promise<T>
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new APIError(408, 'Request timed out — please try again')
+      throw new APIError(408, 'Request timed out. Please try again')
     }
     throw err
   } finally {
@@ -173,7 +173,7 @@ export async function uploadDashboardData(sessionId: string, csvString: string):
 
   const headers: Record<string, string> = { ...authHeaders() }
   if (API_KEY) headers['X-API-Key'] = API_KEY
-  // Do NOT set Content-Type — browser sets multipart/form-data boundary automatically
+  // Do NOT set Content-Type: the browser sets multipart/form-data boundary automatically
 
   const res = await fetch(`${API_BASE}/api/v1/dashboards/${sessionId}/data`, {
     method: 'POST',

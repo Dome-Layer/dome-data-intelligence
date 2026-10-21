@@ -92,7 +92,7 @@ export default function SummaryTable({ chart, rows, classifications }: ChartProp
                         isNumeric ? 'text-right font-mono text-dome-text' : 'text-dome-text',
                       ].join(' ')}
                     >
-                      {formatted || <span className="text-dome-muted">—</span>}
+                      {formatted || <span className="text-dome-muted">N/A</span>}
                     </td>
                   )
                 })}

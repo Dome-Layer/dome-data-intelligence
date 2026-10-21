@@ -70,7 +70,7 @@ export default function GovernanceBadge({
         )}
       </div>
 
-      {/* Input hash — governance audit trail */}
+      {/* Input hash: governance audit trail */}
       <p className="mt-2 font-mono text-[10px] text-dome-muted">
         {event.input_hash}
       </p>

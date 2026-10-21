@@ -6,7 +6,7 @@ export interface ChartProps {
   classifications: ColumnClassification[]
 }
 
-// Light-theme palette — saturated enough to read on white
+// Light-theme palette, saturated enough to read on white
 export const DOME_PALETTE = [
   '#0891b2', // cyan-600 (primary)
   '#7c3aed', // violet-600
@@ -71,7 +71,7 @@ export function makeDateTickFormatter(xValues: string[]): (v: string) => string 
 }
 
 export function fmtValue(n: number, unit?: string | null): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return 'N/A'
   const prefix = unit === 'EUR' ? '€' : unit === 'USD' ? '$' : unit === 'GBP' ? '£' : ''
   const suffix = unit && !['EUR', 'USD', 'GBP'].includes(unit) ? ` ${unit}` : ''
   const abs = Math.abs(n)

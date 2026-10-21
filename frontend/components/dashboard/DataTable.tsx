@@ -189,7 +189,7 @@ function RangeFilter({ min, max, onMin, onMax, isHighlighted }: RangeFilterProps
         placeholder="Min"
         className="w-[64px] rounded border border-dome-border bg-dome-elevated px-1.5 py-0.5 font-mono text-xs text-dome-text placeholder:text-dome-tertiary focus:border-dome-border-accent focus:outline-none"
       />
-      <span className="text-xs text-dome-tertiary">–</span>
+      <span className="text-xs text-dome-tertiary">to</span>
       <input
         type="number"
         value={max}
@@ -470,7 +470,7 @@ export default function DataTable({
                         ].join(' ')}
                       >
                         {row[col] == null ? (
-                          <span className="text-dome-tertiary">—</span>
+                          <span className="text-dome-tertiary">N/A</span>
                         ) : (
                           String(row[col])
                         )}
@@ -488,7 +488,7 @@ export default function DataTable({
       {filtered.length > 0 && (
         <div className="flex items-center justify-between">
           <span className="font-mono text-xs text-dome-muted">
-            Showing {startRow}–{endRow} of {filtered.length.toLocaleString()} rows
+            Showing {startRow} to {endRow} of {filtered.length.toLocaleString()} rows
           </span>
           <div className="flex items-center gap-2">
             <button
