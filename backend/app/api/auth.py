@@ -1,4 +1,4 @@
-"""Auth endpoints — session deletion."""
+"""Auth endpoints: session deletion."""
 
 from fastapi import APIRouter, Request
 
@@ -11,7 +11,7 @@ router = APIRouter()
 async def delete_session(req: Request):
     db = get_supabase_client()
     if db is None:
-        return  # graceful — no-op when auth not configured
+        return  # graceful: no-op when auth not configured
     auth = req.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         return

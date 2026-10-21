@@ -1,4 +1,4 @@
-"""Saved dashboards endpoints — backed by Supabase when configured."""
+"""Saved dashboards endpoints, backed by Supabase when configured."""
 
 from datetime import datetime, timezone
 from typing import Optional
@@ -149,7 +149,7 @@ async def restore_dashboard(session_id: str, req: Request):
             if url:
                 response["data_url"] = url
         except Exception:
-            pass  # non-fatal — frontend degrades to metadata-only view
+            pass  # non-fatal; frontend degrades to metadata-only view
 
     return response
 

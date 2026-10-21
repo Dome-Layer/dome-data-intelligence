@@ -120,7 +120,7 @@ class QARequest(BaseModel):
     session_id: str
     question: str
     conversation_history: list[ConversationTurn]
-    # Optional inline context — sent by the frontend so Q&A works without Supabase
+    # Optional inline context, sent by the frontend so Q&A works without Supabase
     column_summary: Optional[list[ColumnSummary]] = None
     classifications: Optional[list[ColumnClassification]] = None
     data_context: Optional[str] = None  # pre-computed aggregations from raw rows

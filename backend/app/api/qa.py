@@ -6,6 +6,7 @@ from slowapi.util import get_remote_address
 from app.core.auth import require_api_key, verify_bearer_optional, verify_session_id
 from app.core.config import get_llm_provider
 from app.core.db import get_supabase_client
+from app.core.house_style import strip_dashes
 from app.core.logging import get_logger
 from app.models.schemas import (
     ColumnClassification,
@@ -83,7 +84,8 @@ async def answer_question(request: Request, body: QARequest) -> QAResponse:
         logger.error("qa_failed", error=str(exc))
         raise HTTPException(status_code=502, detail=f"LLM provider error: {exc}")
 
-    answer = str(result_data.get("answer", ""))
+    # House style: no em or en dashes in the answer the user reads.
+    answer = strip_dashes(str(result_data.get("answer", "")))
     columns_referenced = list(result_data.get("columns_referenced", []))
     confidence = float(result_data.get("confidence", 0.8))
     human_in_loop = HumanInLoop.recommended if confidence < 0.6 else HumanInLoop.not_required

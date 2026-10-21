@@ -4,7 +4,7 @@ from app.providers.base import LLMProvider
 
 
 class OllamaProvider(LLMProvider):
-    """Ollama provider stub — not yet implemented."""
+    """Ollama provider stub, not yet implemented."""
 
     def __init__(self, settings: Settings) -> None:
         self.url = settings.ollama_url

@@ -28,6 +28,6 @@ class LLMProvider(ABC):
         Returns a dict with keys:
             answer (str): plain-text answer
             columns_referenced (list[str]): column names mentioned
-            confidence (float): 0–1 confidence score
+            confidence (float): 0-1 confidence score
         """
         ...
