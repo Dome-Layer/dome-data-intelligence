@@ -13,7 +13,7 @@ export default function AuthCallbackPage() {
     if (getToken()) {
       router.replace("/");
     } else {
-      // Cookie not found — send to central login
+      // Cookie not found: send to central login
       window.location.href = `${getAuthSiteUrl()}/login?redirect=${encodeURIComponent(window.location.origin)}`;
     }
   }, [router]);

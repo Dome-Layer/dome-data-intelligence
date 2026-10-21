@@ -16,7 +16,7 @@ const TYPE_COLOURS: Record<string, string> = {
 }
 
 function fmt(n: number | null | undefined): string {
-  if (n == null || !isFinite(n)) return '—'
+  if (n == null || !isFinite(n)) return 'N/A'
   return n.toLocaleString('en-GB', { maximumFractionDigits: 2 })
 }
 
@@ -31,7 +31,7 @@ export default function ColumnProfileTable({
     const headers = ['Column', 'Type', 'Unique', 'Null%', 'Min', 'Max', 'Mean', 'Samples', 'Unit', 'Note']
     const csvRows = classifications.map((col) => {
       const s = summaryByName[col.column_name]
-      const nullPct = s && rowCount > 0 ? ((s.null_count / rowCount) * 100).toFixed(1) + '%' : '—'
+      const nullPct = s && rowCount > 0 ? ((s.null_count / rowCount) * 100).toFixed(1) + '%' : 'N/A'
       const isMetric = col.classified_type === 'metric'
       return [
         col.column_name,
@@ -88,9 +88,9 @@ export default function ColumnProfileTable({
               const colour =
                 TYPE_COLOURS[col.classified_type] ?? 'text-dome-muted bg-dome-elevated ring-dome-border'
               const nullPct =
-                s && rowCount > 0 ? `${((s.null_count / rowCount) * 100).toFixed(1)}%` : '—'
+                s && rowCount > 0 ? `${((s.null_count / rowCount) * 100).toFixed(1)}%` : 'N/A'
               const isMetric = col.classified_type === 'metric'
-              const samples = s?.sample_values?.slice(0, 3).join(', ') ?? '—'
+              const samples = s?.sample_values?.slice(0, 3).join(', ') ?? 'N/A'
               return (
                 <tr key={col.column_name} className="border-b border-dome-border last:border-0">
                   <td className="px-3 py-2 font-mono text-sm text-dome-text">{col.column_name}</td>
@@ -115,8 +115,8 @@ export default function ColumnProfileTable({
                   <td className="max-w-[200px] truncate px-3 py-2 font-mono text-xs text-dome-muted">
                     {samples}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-dome-muted">{col.unit ?? '—'}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-dome-muted">{col.note ?? '—'}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-dome-muted">{col.unit ?? 'N/A'}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-dome-muted">{col.note ?? 'N/A'}</td>
                 </tr>
               )
             })}

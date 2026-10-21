@@ -27,7 +27,7 @@ function computeBins(values: number[]): { label: string; count: number }[] {
     Math.abs(n) >= 1000 ? `${+(n / 1000).toFixed(1)}K` : n.toFixed(n % 1 === 0 ? 0 : 1)
 
   const bins = Array.from({ length: BIN_COUNT }, (_, i) => ({
-    label: `${fmt(min + i * binSize)}–${fmt(min + (i + 1) * binSize)}`,
+    label: `${fmt(min + i * binSize)} to ${fmt(min + (i + 1) * binSize)}`,
     count: 0,
   }))
   for (const v of values) {

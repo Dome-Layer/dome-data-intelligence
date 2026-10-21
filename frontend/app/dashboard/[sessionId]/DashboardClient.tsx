@@ -57,7 +57,7 @@ export default function DashboardClient() {
 
   function handleChartClick(chart: ChartConfig) {
     if (activeChartId === chart.chart_id) {
-      // Second click on same chart — clear highlight
+      // Second click on the same chart clears the highlight
       setActiveChartId(null)
       setHighlightColumns([])
     } else {
@@ -89,7 +89,7 @@ export default function DashboardClient() {
       }
     }
 
-    // sessionStorage miss — check cookie directly (synchronous, no race condition)
+    // sessionStorage miss: check the cookie directly (synchronous, no race condition)
     if (!getToken()) {
       setNotFound(true)
       return
@@ -112,7 +112,7 @@ export default function DashboardClient() {
               restoredRows = parsed.data
             }
           } catch {
-            // non-fatal — degrade to metadata-only view
+            // non-fatal: degrade to a metadata-only view
           }
         }
 
@@ -135,7 +135,7 @@ export default function DashboardClient() {
           const toCache = { ...sessionData, expiresAt: Date.now() + 30 * 60 * 1000 }
           sessionStorage.setItem(`dome_session_${sessionId}`, JSON.stringify(toCache))
         } catch {
-          // non-fatal — quota exceeded or private browsing
+          // non-fatal: quota exceeded or private browsing
         }
       })
       .catch(() => setNotFound(true))
@@ -218,7 +218,7 @@ export default function DashboardClient() {
 
   return (
     <>
-    {/* QAPanel is position:fixed — renders outside the scroll flow */}
+    {/* QAPanel is position:fixed, so it renders outside the scroll flow */}
     <QAPanel
       sessionId={sessionId}
       columnSummary={columnSummary ?? []}
@@ -254,7 +254,7 @@ export default function DashboardClient() {
                 opacity: saveStatus === 'saving' ? 0.6 : 1,
               }}
             >
-              {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : saveStatus === 'error' ? 'Error — retry' : 'Save'}
+              {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : saveStatus === 'error' ? 'Error, retry' : 'Save'}
             </button>
             <button
               onClick={() => router.push('/')}
@@ -298,7 +298,7 @@ export default function DashboardClient() {
         {/* Governance */}
         {governance && <GovernanceBadge event={governance} />}
 
-        {/* Charts — click a chart to highlight its columns in the data table */}
+        {/* Charts: click a chart to highlight its columns in the data table */}
         <DashboardGrid
           charts={charts}
           rows={rows}
@@ -307,7 +307,7 @@ export default function DashboardClient() {
           onChartClick={handleChartClick}
         />
 
-        {/* Column Profile — open by default */}
+        {/* Column Profile: open by default */}
         <div className="rounded-lg border border-dome-border bg-dome-surface">
           <button
             onClick={() => setShowColumnProfile((v) => !v)}
@@ -342,7 +342,7 @@ export default function DashboardClient() {
           )}
         </div>
 
-        {/* Raw Data — collapsed by default; hidden if no rows (restored view) */}
+        {/* Raw Data: collapsed by default; hidden if no rows (restored view) */}
         {rows.length > 0 && <div className="rounded-lg border border-dome-border bg-dome-surface">
           <button
             onClick={() => setShowRawData((v) => !v)}
@@ -381,7 +381,7 @@ export default function DashboardClient() {
 
 
       </div>
-      {/* Spacer column — QAPanel (position:fixed) overlays this */}
+      {/* Spacer column: QAPanel (position:fixed) overlays this */}
       <div className="hidden lg:block" aria-hidden="true" />
       </div>
     </main>

@@ -21,7 +21,7 @@ export default function RuleBadge({
 }: RuleBadgeProps) {
   const meta = RULE_META[ruleId]
   const label = meta?.name ?? ruleId
-  const title = meta ? `${meta.name} — ${meta.desc}` : ruleId
+  const title = meta ? `${meta.name}: ${meta.desc}` : ruleId
 
   return (
     <span

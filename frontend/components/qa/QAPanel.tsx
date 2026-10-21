@@ -102,13 +102,13 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
     }
   }
 
-  // ── Shared JSX blocks (variables, not components — avoids unmount on re-render) ──
+  // ── Shared JSX blocks (variables, not components, to avoid an unmount on re-render) ──
 
   const messageList = (listRef: React.RefObject<HTMLDivElement>) => (
     <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
       {conversation.length === 0 ? (
         <p className="pt-4 text-center font-mono text-xs text-dome-tertiary">
-          Ask anything about your dataset — column statistics, patterns, or summaries.
+          Ask anything about your dataset: column statistics, patterns, or summaries.
         </p>
       ) : (
         conversation.map((turn, i) => (
@@ -165,14 +165,14 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
 
   return (
     <>
-      {/* ── Desktop sidebar (lg+) — fixed right panel ── */}
+      {/* ── Desktop sidebar (lg+): fixed right panel ── */}
       <div className="fixed right-0 top-16 hidden h-[calc(100vh-4rem)] w-[380px] flex-col border-l border-dome-border bg-dome-surface shadow-sm lg:flex">
         <div className="shrink-0 border-b border-dome-border px-4 py-3">
           <p className="text-xs font-medium uppercase tracking-widest text-dome-muted">
             Ask about your data
           </p>
           <p className="mt-0.5 font-mono text-[10px] text-dome-tertiary">
-            Based on column statistics — raw rows never sent to AI
+            Based on column statistics. Raw rows are never sent to AI
           </p>
         </div>
         {messageList(desktopListRef)}
@@ -180,7 +180,7 @@ export default function QAPanel({ sessionId, columnSummary, classifications, dat
         {inputArea}
       </div>
 
-      {/* ── Mobile bottom sheet (< lg) — fixed bottom ── */}
+      {/* ── Mobile bottom sheet (< lg): fixed bottom ── */}
       <div
         className="fixed inset-x-0 bottom-0 z-[100] border-t-2 border-dome-accent bg-dome-surface shadow-2xl lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
