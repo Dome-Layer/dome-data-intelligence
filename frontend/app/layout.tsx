@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Dome Data Intelligence',
+  title: 'Data Intelligence | DOME',
   description:
     'Upload any spreadsheet. Get a governed analytics dashboard in seconds.',
   icons: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
 }
 
-// Runs before first paint — prevents theme flash. Reads cookie first (shared
+// Runs before first paint to prevent a theme flash. Reads cookie first (shared
 // across all *.domelayer.com subdomains), then falls back to localStorage.
 const themeScript = `
 (function() {

@@ -9,12 +9,12 @@ const STEPS: { id: UploadStep; label: string; detail: string }[] = [
   {
     id: 'parsing',
     label: 'Parsing file locally',
-    detail: 'Extracting column summary — raw data stays in your browser',
+    detail: 'Extracting column summary. Raw data stays in your browser',
   },
   {
     id: 'uploading',
     label: 'Uploading column summary',
-    detail: 'Sending metadata only — no rows transmitted',
+    detail: 'Sending metadata only, no rows transmitted',
   },
   {
     id: 'classifying',

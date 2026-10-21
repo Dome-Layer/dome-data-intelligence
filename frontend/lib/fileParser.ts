@@ -98,7 +98,7 @@ function normaliseRow(row: Record<string, unknown>): DataRow {
   const out: DataRow = {}
   for (const [key, val] of Object.entries(row)) {
     if (val instanceof Date) {
-      // Use local date parts — toISOString() is UTC and causes off-by-one in non-UTC timezones
+      // Use local date parts: toISOString() is UTC and causes off-by-one in non-UTC timezones
       const y = val.getFullYear()
       const m = String(val.getMonth() + 1).padStart(2, '0')
       const d = String(val.getDate()).padStart(2, '0')
@@ -148,7 +148,7 @@ async function parseExcel(file: File): Promise<ExcelParseResult> {
     groups.set(sheet.columnKey, existing)
   }
 
-  // Pick the largest schema group — merge all its sheets
+  // Pick the largest schema group and merge all its sheets
   let best: typeof parsed = []
   for (const group of groups.values()) {
     if (group.length > best.length || (group.length === best.length &&
@@ -197,7 +197,7 @@ export async function parseFile(file: File): Promise<ParsedFile> {
     )
   }
 
-  // Detect actual format by magic bytes — handles .csv files that are really Excel
+  // Detect the actual format by magic bytes (handles .csv files that are really Excel
   const isExcel = ext !== 'csv' || (await detectIsExcel(file))
 
   let rows: DataRow[]

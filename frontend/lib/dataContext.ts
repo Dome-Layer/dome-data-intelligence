@@ -9,7 +9,7 @@ function fmt(n: number): string {
 /**
  * Compute structured aggregations from raw rows entirely client-side.
  * Returns a plain-text block that the LLM can use to answer quantitative questions.
- * Raw rows never leave the browser — only these pre-computed numbers are sent.
+ * Raw rows never leave the browser: only these pre-computed numbers are sent.
  */
 export function computeDataContext(
   rows: DataRow[],

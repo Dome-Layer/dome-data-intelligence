@@ -76,7 +76,7 @@ export default function UploadPage() {
             JSON.stringify(sessionPayload),
           )
         } catch {
-          // sessionStorage full — store without rows (DataTable falls back gracefully)
+          // sessionStorage full: store without rows (DataTable falls back gracefully)
           sessionStorage.setItem(
             `dome_session_${uploadRes.session_id}`,
             JSON.stringify({ ...sessionPayload, rows: [] }),
