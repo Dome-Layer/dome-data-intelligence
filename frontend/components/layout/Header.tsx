@@ -15,6 +15,7 @@ export function Header() {
       toolName="Data Intelligence"
       width={width}
       navLinks={[{ label: "Saved", href: "/saved" }]}
+      currentPath={pathname ?? undefined}
       renderLink={({ href, children, ...rest }) => (
         <Link href={href} {...rest}>
           {children}
